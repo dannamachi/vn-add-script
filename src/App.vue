@@ -1,5 +1,5 @@
 <template>
-  <img alt="my logo" src="./assets/icon_cropped.png">
+  <img alt="my logo" src="./assets/icon_cropped.png" width='200' height='200'>
   <h2>script:
     <input v-model='scriptObj.meta__name' />
   </h2>
