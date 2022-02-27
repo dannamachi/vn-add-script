@@ -165,7 +165,7 @@ export default {
       spriteObj.exp = 'neutral'
       spriteObj.included = true
       // push to line
-      this.$set(this.scriptObj['scene__' + sceneName]['line__' + lineName], 'sprite__' + spriteName, spriteObj);
+      this.scriptObj['scene__' + sceneName]['line__' + lineName]['sprite__' + spriteName] = spriteObj
     },
     onAddSprite(spObj) {
       if (spObj.sprite == 'narrator') {
@@ -178,11 +178,11 @@ export default {
           }
         }
       }
-      this.$set(this.scriptObj, 'char__' + spObj.sprite, {
+      this.scriptObj['char__' + spObj.sprite] = {
         keyName: spObj.sprite,
         name: spObj.sprite,
         expList: ['neutral']
-      })
+      }
       this.scriptObj.meta__ccount += 1
     },
     onAddBG(bgObj) {
@@ -325,10 +325,10 @@ export default {
         }
       }
       // add to script obj
-      this.$set(this.$scriptObj['scene__' + sceneName], 'line__' + uniqueID, newLine)
+      this.$scriptObj['scene__' + sceneName]['line__' + uniqueID] = newLine
       // adjust lines in chain
-      this.$set(lastLine, 'next', newLine)
-      if (nextLine) this.$set(nextLine, 'previous', newLine)
+      this.scriptObj['scene__' + sceneName]['line__' + lastName].next = newLine
+      if (nextLine) this.scriptObj['scene__' + sceneName]['line__' + nextName].previous = newLine
     },
     // unique indexed keyname
     // editable name
@@ -354,11 +354,11 @@ export default {
       }
 
       // add to script obj
-      this.$set(this.$scriptObj, 'scene__' + uniqueID, newScene)
+      this.scriptObj['scene__' + uniqueID] = newScene
       this.scriptObj.meta__scount += 1
       // adjust lines in chain
-      if (lastScene) this.$set(lastScene, 'next', newScene)
-      if (nextScene) this.$set(nextScene, 'previous', newScene)
+      if (lastScene) this.scriptObj['scene__' + lastName].next = newScene
+      if (nextScene) this.scriptObj['scene__' + nextName].previous = newScene
     }
   }
 }
