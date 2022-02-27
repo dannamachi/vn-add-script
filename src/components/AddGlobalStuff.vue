@@ -1,6 +1,6 @@
 <template>
     <div>
-        <input type="text" placeholder="enter to add " + stuffType v-model="newExp" maxlength="40" @keypress.enter.prevent="addExp"/>
+        <input type="text" :placeholder='"enter to add new " + stuffType' v-model="newExp" maxlength="40" @keypress.enter.prevent="addExp"/>
         <!-- <button @click="addCategory()">Add category</button> -->
     </div>
 </template>

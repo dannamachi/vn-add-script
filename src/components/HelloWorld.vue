@@ -2,7 +2,7 @@
   <div class="hello">
     <!-- show some content stats here -->
     <!-- button -->
-    <button @click='downloadJson()'></button>
+    <button @click='downloadJson()'>Download script file</button>
   </div>
 </template>
 

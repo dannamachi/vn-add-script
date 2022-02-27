@@ -9,26 +9,26 @@
   <p>scenes: {{ scriptObj.meta__scount }} scene(s)</p>
   <p>charas: {{ scriptObj.meta__ccount - 1 }} charas (excluding default narrator)</p>
 
-  <!-- section to display scene for edit -->
+  <!-- section to display scenes for edit -->
   <div v-for='(scene, index) in getScenes()' :key="index">
     scene: <input v-model='scriptObj["scene__" + scene.keyName].name' />
     author: <input v-model='scriptObj["scene__" + scene.keyName].author' />
     <!-- bg section -->
-    <AddGlobalStuff @add-exp='onAddBG' />
+    <AddGlobalStuff @add-exp='onAddBG' v-bind:stuffType='"background"'/>
     background:
     <select v-model='scriptObj["scene__" + scene.keyName].background'>
       <option disabled value="">new background - add above</option>
       <div v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
-        <option value='bg'>{{ bg }}</option>
+        <option>{{ bg }}</option>
       </div>
     </select>
     <!-- ost section  -->
-    <AddGlobalStuff @add-exp='onAddOST' />
+    <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
     music:
     <select v-model='scriptObj["scene__" + scene.keyName].ost'>
       <option disabled value="">new music - add above</option>
       <div v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
-        <option value='ost'>{{ ost }}</option>
+        <option>{{ ost }}</option>
       </div>
     </select>
     <!-- section to display line for edit -->
@@ -37,7 +37,12 @@
       <input v-if='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].displaySame' type="checkbox" v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].displaySame' />same display ?
       <div v-if="!line.displaySame">
         <!-- show current display sprites -->
-        <div v-for='(sprite, index4) in getSprites(line)' :key='index4' :class='{ incChara: scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included, notIncChara: !(scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included) }'>
+        <div 
+          v-for='(sprite, index4) in getSprites(line)' 
+          :key='index4' 
+          :class='{ 
+            incChara: scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included,
+            notIncChara: !(scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included) }'>
           chara display name: 
           <input v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].name' />
           chara expression:
@@ -45,21 +50,21 @@
           <select v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].exp'>
             <option disabled value="">new expression - add below</option>
             <div v-for='(charExp, index5) in getExpressions(sprite.keyName)' :key='index5'>
-              <option value='charExp'>{{ charExp }}</option>
+              <option>{{ charExp }}</option>
             </div>
           </select>
           <!-- comp to add new global expression -->
-          <AddGlobalStuff v-bind:char='sprite.keyName' @add-exp='onAddExpression' />
+          <AddGlobalStuff v-bind:stuffType='"expression"' v-bind:char='sprite.keyName' @add-exp='onAddExpression' />
           chara pos
           <!-- section for positions -->
           <select v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].pos'>
             <option disabled value="">new position - add below</option>
             <div v-for='(cPos, index6) in scriptObj.meta__posList' :key='index6'>
-              <option value='cPos'>{{ cPos }}</option>
+              <option>{{ cPos }}</option>
             </div>
           </select>
           <!-- comp to add new global position -->
-          <AddGlobalStuff @add-exp='onAddPosition' />
+          <AddGlobalStuff v-bind:stuffType='"position"' @add-exp='onAddPosition' />
           <input type="checkbox" v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included' />include chara ?
         </div>
         <!-- add new char to display -->
@@ -70,13 +75,13 @@
         </div>
       </div>
       <!-- comp to add new global character -->
-      <AddGlobalStuff @add-exp='onAddSprite' />
+      <AddGlobalStuff v-bind:stuffType='"sprite"' @add-exp='onAddSprite' />
       <!-- speaker section -->
       chara speaking:
       <select v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].speaker'>
         <option disabled value="">new speaker - add above</option>
         <div v-for='(speaking, index8) in getAllSprites()' :key='index8'>
-          <option value='speaking'>{{ speaking }}</option>
+          <option>{{ speaking }}</option>
         </div>
       </select>
       <!-- text section -->
@@ -101,7 +106,7 @@
 import HelloWorld from './components/HelloWorld.vue'
 import AddGlobalStuff from './components/AddGlobalStuff.vue'
 import { v4 as uuidv4 } from 'uuid';
-
+import { reactive } from "vue";
 // let copiedPerson = JSON.parse(JSON.stringify(person));
 
 export default {
@@ -110,27 +115,27 @@ export default {
     HelloWorld,
     AddGlobalStuff
   },
-  data() {
-    return {
-      scriptObj: {
-        'meta__name'    : "New Script",
-        'meta__author'  : 'Cool Author',
-        'meta__updated' : new Date().toString(),
-        'meta__scount'  : 0,
-        'meta__ccount'  : 1,
-        'meta__posList' : ['center', 'left', 'right'],
-        'meta__bgList'  : ['none'],
-        'meta__ostList' : ['none'],
-        // default narrator character
-        'char__narrator': {
-          keyName   : '__narrator',
-          name      : ''
-        },
-        // linked list start end
-        'meta__startName'   : '',
-        'meta__endName'     : ''
-      }
-    }
+  setup() {
+    const scriptObj = reactive({
+      'meta__name'    : "New Script",
+      'meta__author'  : 'Cool Author',
+      'meta__updated' : new Date().toString(),
+      'meta__scount'  : 0,
+      'meta__ccount'  : 1,
+      'meta__posList' : ['center', 'left', 'right'],
+      'meta__bgList'  : ['none'],
+      'meta__ostList' : ['none'],
+      // default narrator character
+      'char__narrator': {
+        keyName   : '__narrator',
+        name      : '',
+        expList   : []
+      },
+      // linked list start end
+      'meta__startName'   : '',
+      'meta__endName'     : ''
+    })
+    return { scriptObj }
   },
   created() {
     // create new scene upon init
@@ -265,12 +270,11 @@ export default {
       // evolution recursive baby ( sure hope this doesn't fuck me over )
       var hey = true
       while (hey) {
+        lineList.push(line);
         if ('line__' + line.keyName == scene.meta__endName) {
           hey = false
           break;
         } else {
-          console.log('adding:' + line.keyName)
-          lineList.push(line);
           line = line.next;
         }
       }
@@ -285,17 +289,16 @@ export default {
           break;
         }
       }
-
+      
       if (!scene) { return []}
       // evolution recursive baby ( sure hope this doesn't fuck me over )
       var hey = true
       while (hey) {
+        sceneList.push(scene);
         if ('scene__' + scene.keyName == this.scriptObj.meta__endName) {
           hey = false
           break;
         } else {
-          console.log('adding:' + scene.keyName)
-          sceneList.push(scene);
           scene = scene.next;
         }
       }
@@ -305,7 +308,8 @@ export default {
     // second char list
     onAddLine(sceneName, lastName, nextName) {
       // fetch lines
-      var lastLine = this.scriptObj['scene__' + sceneName]['line__' + lastName]
+      var lastLine = null
+      if (lastName != '') lastLine = this.scriptObj['scene__' + sceneName]['line__' + lastName]
       var nextLine = null
       if (nextName != "") nextLine = this.scriptObj['scene__' + sceneName]['line__' + nextName]
       // new line
@@ -319,16 +323,20 @@ export default {
         displaySame: true
       }
       // add previous display sprites by default
-      for (const [key, value] of Object.entries(lastLine)) {
-        if (key.startsWith('sprite__')) {
-          newLine['sprite__' + value.keyName] = value
+      if (lastLine) {
+        for (const [key, value] of Object.entries(lastLine)) {
+          if (key.startsWith('sprite__')) {
+            newLine['sprite__' + value.keyName] = value
+          }
         }
       }
       // add to script obj
-      this.$scriptObj['scene__' + sceneName]['line__' + uniqueID] = newLine
+      this.scriptObj['scene__' + sceneName]['line__' + uniqueID] = newLine
       // adjust lines in chain
-      this.scriptObj['scene__' + sceneName]['line__' + lastName].next = newLine
+      if (lastLine) this.scriptObj['scene__' + sceneName]['line__' + lastName].next = newLine
+      else this.scriptObj['scene__' + sceneName].meta__startName = newLine
       if (nextLine) this.scriptObj['scene__' + sceneName]['line__' + nextName].previous = newLine
+      else this.scriptObj['scene__' + sceneName].meta__endName = newLine
     },
     // unique indexed keyname
     // editable name
@@ -356,9 +364,15 @@ export default {
       // add to script obj
       this.scriptObj['scene__' + uniqueID] = newScene
       this.scriptObj.meta__scount += 1
+
+      // add one line
+      this.onAddLine(uniqueID, '', '')
+      
       // adjust lines in chain
       if (lastScene) this.scriptObj['scene__' + lastName].next = newScene
+      else this.scriptObj.meta__startName = 'scene__' + uniqueID
       if (nextScene) this.scriptObj['scene__' + nextName].previous = newScene
+      else this.scriptObj.meta__endName = 'scene__' + uniqueID
     }
   }
 }
