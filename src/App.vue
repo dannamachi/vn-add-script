@@ -147,14 +147,14 @@ export default {
     },
     addSpriteToDisplay(sceneName, lineName, spriteName) {
       // check sprite not alr added
-      for (const[key2, value2] of this.scriptObj['scene__' + sceneName]['line__' + lineName]) {
+      for (const[key2, value2] of Object.entries(this.scriptObj['scene__' + sceneName]['line__' + lineName])) {
         if (key2 == 'sprite__' + spriteName) {
           return;
         }
       }
       // fetch sprite
       var spriteObj = null;
-      for (const [key, value] of this.scriptObj) {
+      for (const [key, value] of Object.entries(this.scriptObj)) {
         if (key == 'char__' + spriteName) {
           spriteObj = value;
         }
@@ -170,7 +170,7 @@ export default {
       if (spObj.sprite == 'narrator') {
         return;
       }
-      for (const [key, value] of this.scriptObj) {
+      for (const [key, value] of Object.entries(this.scriptObj)) {
         if (key.startsWith('char__')) {
           if (value.keyName == spObj.sprite) {
             return;
@@ -209,7 +209,7 @@ export default {
       this.scriptObj.meta__posList.push(posObj.pos);
     },
     onAddExpression(expObj) {
-      for (const [key, value] of this.scriptObj) {
+      for (const [key, value] of Object.entries(this.scriptObj)) {
         if (key.startsWith('char__')) {
           if (value.keyName == expObj.char && value.keyName != '__narrator') {
             value.expList.push(expObj.exp)
@@ -220,7 +220,7 @@ export default {
     },
     getAllSprites() {
       var sList = []
-      for (const [key, value] of this.scriptObj) {
+      for (const [key, value] of Object.entries(this.scriptObj)) {
         if (key.startsWith('char__')) {
           sList.push(value)
         }
@@ -229,7 +229,7 @@ export default {
     },
     getExpressions(spriteName) {
       var expList = []
-      for (const [key, value] of this.scriptObj) {
+      for (const [key, value] of Object.entries(this.scriptObj)) {
         if (key.startsWith('char__')) {
           if (value.keyName == spriteName && value.keyName != '__narrator') {
             for (var e of value.expList) {
@@ -243,7 +243,7 @@ export default {
     },
     getSprites(line) {
       var sList = []
-      for (const [key, value] of line) {
+      for (const [key, value] of Object.entries(line)) {
         if (key.startsWith('sprite__')) {
           sList.push(value)
         }
@@ -314,7 +314,7 @@ export default {
         displaySame: true
       }
       // add previous display sprites by default
-      for (const [key, value] of lastLine) {
+      for (const [key, value] of Object.entries(lastLine)) {
         if (key.startsWith('sprite__')) {
           newLine['sprite__' + value.keyName] = value
         }
