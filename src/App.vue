@@ -115,7 +115,7 @@ export default {
       scriptObj: {
         'meta__name'    : "New Script",
         'meta__author'  : 'Cool Author',
-        'meta__updated' : Date.now(),
+        'meta__updated' : new Date().toString(),
         'meta__scount'  : 0,
         'meta__ccount'  : 1,
         'meta__posList' : ['center', 'left', 'right'],
@@ -135,7 +135,7 @@ export default {
   created() {
     // create new scene upon init
     if (this.getScenes().length == 0) {
-      onAddScene('', '')
+      this.onAddScene('', '')
     }
   },
   methods: {
@@ -148,6 +148,7 @@ export default {
     addSpriteToDisplay(sceneName, lineName, spriteName) {
       // check sprite not alr added
       for (const[key2, value2] of Object.entries(this.scriptObj['scene__' + sceneName]['line__' + lineName])) {
+        value2
         if (key2 == 'sprite__' + spriteName) {
           return;
         }
@@ -262,8 +263,10 @@ export default {
 
       if (!line) { return []}
       // evolution recursive baby ( sure hope this doesn't fuck me over )
-      while (true) {
+      var hey = true
+      while (hey) {
         if ('line__' + line.keyName == scene.meta__endName) {
+          hey = false
           break;
         } else {
           console.log('adding:' + line.keyName)
@@ -285,8 +288,10 @@ export default {
 
       if (!scene) { return []}
       // evolution recursive baby ( sure hope this doesn't fuck me over )
-      while (true) {
+      var hey = true
+      while (hey) {
         if ('scene__' + scene.keyName == this.scriptObj.meta__endName) {
+          hey = false
           break;
         } else {
           console.log('adding:' + scene.keyName)
@@ -306,7 +311,7 @@ export default {
       // new line
       var uniqueID = uuidv4(); // ⇨ '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
       var newLine = {
-        keyName = uniqueID,
+        keyName : uniqueID,
         speaker: '',
         text: '',
         next: nextLine,
@@ -339,9 +344,9 @@ export default {
       // new scene
       var uniqueID = uuidv4(); // ⇨ '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
       var newScene = {
-        name = 'new scene',
+        name : 'new scene',
         author: this.scriptObj.meta__author,
-        keyName = uniqueID,
+        keyName : uniqueID,
         next: nextScene,
         previous: lastScene,
         background: 'none',
