@@ -9,10 +9,6 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarScroll">
         <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
-          <!-- load script -->
-          <li class="nav-item">
-            <a class='nav-link' href='#loadScript'>Load Script</a>
-          </li>
           <!-- script info nav -->
           <li class="nav-item">
             <a class="nav-link" href="#scriptInfo">{{ scriptObj.meta__name }}</a>
@@ -30,11 +26,15 @@
           </li>
           <!-- add scene -->
           <li class='nav-item'>
-            <button class="btn btn-primary" @click='addNewScene()'>Add Scene</button>
+            <button class="btn btn-primary" @click='addNewScene()'>add scene</button>
           </li>
           <!-- download -->
           <li class='nav-item'>
               <HelloWorld v-bind:jsonArr='scriptObj' />
+          </li>
+          <!-- load script -->
+          <li class="nav-item">
+            <a class='nav-link' href='#loadScript'>load script</a>
           </li>
         </ul>
       </div>
@@ -63,7 +63,7 @@
         {{ errMsg }}
       </div>
       <textarea name="text" placeholder="paste script text here..." v-model='inputJSON'></textarea>
-      <p><button class='btn btn-info' type='button' @click='loadScript()'>Load Script</button></p>
+      <p><button class='btn btn-info' type='button' @click='loadScript()'>load script</button></p>
     </div>
   </div>
 
@@ -80,7 +80,7 @@
           <div class='accordion-body'>
 
             <!-- (DEV) sceneID: {{ scene.keyName }} -->
-            <div class='card-header'><input v-model='scriptObj["scene__" + scene.keyName].name' /></div>
+            <div class='card-header'>scene: <input v-model='scriptObj["scene__" + scene.keyName].name' /> written by: <input v-model='scriptObj["scene__" + scene.keyName].author' /></div>
 
             <!-- section to display line for edit -->
             <div class='card-body'>
@@ -187,7 +187,7 @@
                 </div>
 
                 <!-- button to add line (indexed unique name) -->
-                <button class="btn btn-primary" @click='onAddLine(scene.keyName, line.keyName, line.next)'>Add Line</button>
+                <button class="btn btn-primary" @click='onAddLine(scene.keyName, line.keyName, line.next)'>add line</button>
               </div>
             </div>
 
@@ -231,10 +231,11 @@
               </div>
             </div>
 
-            <div class='card-footer text-muted'>written by: <input v-model='scriptObj["scene__" + scene.keyName].author' />, lines: {{ getLines(scene).length }}</div>
-
-            <!-- button to add line (indexed unique name) -->
-            <button class="btn btn-link" @click='onAddScene(scene.keyName, scene.next)'>Add Scene</button>
+            <div class='card-footer text-muted'>
+              lines: {{ getLines(scene).length }}
+              <!-- button to add line (indexed unique name) -->
+              <button class="btn btn-link" @click='onAddScene(scene.keyName, scene.next)'>add scene</button>
+            </div>
           </div>
         </div>
     </div>
@@ -259,7 +260,7 @@ export default {
   },
   setup() {
     const scriptObj = reactive({
-      'meta__name'    : "New Script",
+      'meta__name'    : "New script",
       'meta__author'  : 'Cool Author',
       'meta__updated' : new Date().toString(),
       'meta__scount'  : 0,
@@ -282,7 +283,8 @@ export default {
   data() {
     return {
       inputJSON: "",
-      errMsg: ""
+      errMsg: "",
+      startNum: 0
     }
   },
   watch: {
@@ -561,6 +563,7 @@ export default {
     // mark starting object (if first scene) with scene__
     // mark ending object (if last) with scene__
     onAddScene(lastName, nextName) {
+      this.startNum += 1
       // fetch scenes
       var lastScene = null
       if (lastName != '') lastScene = this.scriptObj['scene__' + lastName]
@@ -569,7 +572,7 @@ export default {
       // new scene
       var uniqueID = uuidv4(); // ⇨ '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
       var newScene = {
-        name : 'new scene',
+        name : 'new scene ' + this.startNum.toString(),
         author: this.scriptObj.meta__author,
         keyName : uniqueID,
         next: nextName,
