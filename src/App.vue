@@ -19,10 +19,10 @@
         <!-- (DEV) lineID: {{ line.keyName }} -->
         <!-- if not display same, show current display list, add new display char -->
 
-        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+        <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapseExample'+line.keyName" aria-expanded="false" :aria-controls="'collapseExample'+line.keyName">
           toggle show sprite info
         </button>
-        <div class='collapse' id="collapseExample">
+        <div class='collapse' :id="'collapseExample' + line.keyName">
 
         <!-- show current display sprites -->
         <div 
@@ -84,14 +84,14 @@
           <textarea name="text" maxlength='350' placeholder="storytelling..." v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].text'></textarea>
         <p>-----</p>
         <!-- button to add line (indexed unique name) -->
-        <button @click='onAddLine(scene.keyName, line.keyName, line.next)'>Add Line</button>
+        <button class="btn btn-primary" @click='onAddLine(scene.keyName, line.keyName, line.next)'>Add Line</button>
         <p>-----</p>
       </div>
     </div>
-    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBGOST" aria-expanded="false" aria-controls="BGOST">
+    <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapseBGOST' + scene.keyName" aria-expanded="false" :aria-controls="'collapseBGOST' + scene.keyName">
         toggle background and music
     </button>
-    <div class='collapse' id='collapseBGOST'>
+    <div class='collapse' :id='"collapseBGOST" + scene.keyName'>
     <!-- bg section -->
     background: {{ scriptObj["scene__" + scene.keyName].background }}
     select background
@@ -113,7 +113,7 @@
     <div class='card-footer text-muted'>author: <input v-model='scriptObj["scene__" + scene.keyName].author' />, lines: {{ getLines(scene).length }}</div>
     <p>=========</p>
     <!-- button to add line (indexed unique name) -->
-    <button @click='onAddScene(scene.keyName, scene.next)'>Add Scene</button>
+    <button class="btn btn-link" @click='onAddScene(scene.keyName, scene.next)'>Add Scene</button>
     <p>=========</p>
   </div>
 
@@ -125,6 +125,7 @@
 import HelloWorld from './components/HelloWorld.vue'
 import AddGlobalStuff from './components/AddGlobalStuff.vue'
 import { v4 as uuidv4 } from 'uuid';
+import clone from 'just-clone';
 import { reactive } from "vue";
 // let copiedPerson = JSON.parse(JSON.stringify(person));
 
@@ -197,7 +198,7 @@ export default {
       var spriteObj = null;
       for (const [key, value] of Object.entries(this.scriptObj)) {
         if (key == 'char__' + spriteName) {
-          spriteObj = value;
+          spriteObj = clone(value);
         }
       }
       if (spriteObj == null) return;
@@ -351,7 +352,7 @@ export default {
       var uniqueID = uuidv4(); // ⇨ '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
       var newLine = {
         keyName : uniqueID,
-        speaker: this.scriptObj.char____narrator,
+        speaker: clone(this.scriptObj.char____narrator),
         text: '',
         next: nextName,
         previous: lastName
@@ -360,7 +361,7 @@ export default {
       if (lastLine) {
         for (const [key, value] of Object.entries(lastLine)) {
           if (key.startsWith('sprite__')) {
-            newLine['sprite__' + value.keyName] = value
+            newLine['sprite__' + value.keyName] = clone(value)
           }
         }
         newLine.speaker = lastLine.speaker
