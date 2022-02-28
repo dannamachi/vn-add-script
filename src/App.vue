@@ -29,29 +29,38 @@
             <div 
               v-for='(sprite, index4) in getSprites(line)' 
               :key='index4' 
-              class='card col-lg-auto'>
+              class='card col-sm-auto'>
               <div class='card-header'>
                 {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].name }} ({{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].exp }})
               </div>
               <div class='card-body'>
                 <!-- section for expressions -->
-                select expression
-                <div v-for='(charExp, index5) in getExpressions(sprite.keyName)' :key='index5'>
-                  <button @click='selectExpression(scene.keyName, line.keyName, sprite.keyName, charExp)'>{{ charExp }}</button>
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonExpression'+scene.keyName+line.keyName+sprite.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                    select expression
+                  </button>
+                  <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonExpression'+scene.keyName+line.keyName+sprite.keyName">
+                    <li v-for='(charExp, index5) in getExpressions(sprite.keyName)' :key='index5'>
+                      <button type='button' class='dropdown-item' @click='selectExpression(scene.keyName, line.keyName, sprite.keyName, charExp)'>{{ charExp }}</button>
+                    </li>
+                  </ul>
                 </div>
 
-                add expression
                 <!-- comp to add new global expression -->
                 <AddGlobalStuff v-bind:stuffType='"expression"' v-bind:char='sprite.keyName' @add-exp='onAddExpression' />
 
                 <!-- section for positions -->
-
-                select position
-                <div v-for='(cPos, index6) in scriptObj.meta__posList' :key='index6'>
-                  <button @click='selectPosition(scene.keyName, line.keyName, sprite.keyName, cPos)'>{{ cPos }}</button>
+                <div class="dropdown">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonPosition'+scene.keyName+line.keyName+sprite.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                    select position
+                  </button>
+                  <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonPosition'+scene.keyName+line.keyName+sprite.keyName">
+                    <li v-for='(cPos, index6) in scriptObj.meta__posList' :key='index6'>
+                      <button type='button' class='dropdown-item' @click='selectPosition(scene.keyName, line.keyName, sprite.keyName, cPos)'>{{ cPos }}</button>
+                    </li>
+                  </ul>
                 </div>
 
-                add position
                 <!-- comp to add new global position -->
                 <AddGlobalStuff v-bind:stuffType='"position"' @add-exp='onAddPosition' />
 
@@ -65,24 +74,38 @@
             </div>
           </div>
           <!-- add new char to display -->
-          add sprite to display ?
-          <div v-for='(gSprite, index9) in getAllSprites()' :key='index9'>
-            <div v-if='!isSpriteAddedToLine(gSprite.keyName, line)'>
-              <button @click='addSpriteToDisplay(scene.keyName, line.keyName, gSprite.keyName)'>{{ gSprite.name }}</button>
-            </div>
+          <div v-if='getSprites(line).length == 0'>no sprite displayed</div>
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonDisplayAdd'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+              add sprite
+            </button>
+            <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonDisplayAdd'+scene.keyName+line.keyName">
+              <li v-for='(gSprite, index9) in getAllSprites()' :key='index9'>
+                <div v-if='!isSpriteAddedToLine(gSprite.keyName, line)'>
+                  <button type='button' class='dropdown-item' @click='addSpriteToDisplay(scene.keyName, line.keyName, gSprite.keyName)'>{{ gSprite.name }}</button>
+                </div>
+              </li>
+            </ul>
           </div>
 
         </div>
 
         <!-- comp to add new global character -->
-        add possible speaker
-        <AddGlobalStuff v-bind:stuffType='"sprite"' @add-exp='onAddSprite' />
+        <AddGlobalStuff v-bind:stuffType='"character"' @add-exp='onAddSprite' />
         <!-- speaker section -->
         speaker: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName].speaker.name }}
-        select speaker
-        <div v-for='(speaking, index8) in getAllSprites()' :key='index8'>
-            <button @click='selectSpeaker(scene.keyName, line.keyName, speaking)'>{{ speaking.name }}</button>
-          </div>
+
+        <div class="dropdown">
+          <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonSpeaker'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+            select speaker
+          </button>
+          <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonSpeaker'+scene.keyName+line.keyName">
+            <li v-for='(speaking, index8) in getAllSprites()' :key='index8'>
+              <button type='button' class='dropdown-item' @click='selectSpeaker(scene.keyName, line.keyName, speaking)'>{{ speaking.name }}</button>
+            </li>
+          </ul>
+        </div>
+
         <!-- text section -->
         showing text:
           <textarea name="text" maxlength='350' placeholder="storytelling..." v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].text'></textarea>
