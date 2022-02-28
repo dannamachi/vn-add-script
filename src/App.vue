@@ -93,17 +93,17 @@
         <textarea name="text" maxlength='350' placeholder="storytelling..." v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].text'></textarea>
       <p>-----</p>
       <!-- button to add line (indexed unique name) -->
-      <button @click='onAddLine(scene.keyName, line.keyName, line.next ? line.next.keyName : "")'>Add Line</button>
+      <button @click='onAddLine(scene.keyName, line.keyName, line.next)'>Add Line</button>
       <p>-----</p>
     </div>
     <p>=========</p>
     <!-- button to add line (indexed unique name) -->
-    <button @click='onAddScene(scene.keyName, scene.next ? scene.next.keyName : "")'>Add Scene</button>
+    <button @click='onAddScene(scene.keyName, scene.next)'>Add Scene</button>
     <p>=========</p>
   </div>
 
   <!-- component to download json -->
-  <HelloWorld v-bind:jsonArray='scriptObj' />
+  <HelloWorld v-bind:jsonArr='scriptObj' />
 </template>
 
 <script>
@@ -295,7 +295,7 @@ export default {
           hey = false
           break;
         } else {
-          line = line.next;
+          line = scene["line__" + line.next]
         }
       }
       return lineList;
@@ -319,7 +319,7 @@ export default {
           hey = false
           break;
         } else {
-          scene = scene.next;
+          scene = this.scriptObj["scene__" + scene.next];
         }
       }
       return sceneList;
@@ -338,8 +338,8 @@ export default {
         keyName : uniqueID,
         speaker: this.scriptObj.char____narrator,
         text: '',
-        next: nextLine,
-        previous: lastLine,
+        next: nextName,
+        previous: lastName,
         displaySame: true
       }
       // add previous display sprites and speaker by default
@@ -354,9 +354,9 @@ export default {
       // add to script obj
       this.scriptObj['scene__' + sceneName]['line__' + uniqueID] = newLine
       // adjust lines in chain
-      if (lastLine) this.scriptObj['scene__' + sceneName]['line__' + lastName].next = newLine
+      if (lastLine) this.scriptObj['scene__' + sceneName]['line__' + lastName].next = uniqueID
       else this.scriptObj['scene__' + sceneName].meta__startName = 'line__' + uniqueID
-      if (nextLine) this.scriptObj['scene__' + sceneName]['line__' + nextName].previous = newLine
+      if (nextLine) this.scriptObj['scene__' + sceneName]['line__' + nextName].previous = uniqueID
       else this.scriptObj['scene__' + sceneName].meta__endName = 'line__' + uniqueID
     },
     // unique indexed keyname
@@ -376,8 +376,8 @@ export default {
         name : 'new scene',
         author: this.scriptObj.meta__author,
         keyName : uniqueID,
-        next: nextScene,
-        previous: lastScene,
+        next: nextName,
+        previous: lastName,
         background: this.scriptObj.meta__bgList[0],
         ost: this.scriptObj.meta__ostList[0]
       }
@@ -390,9 +390,9 @@ export default {
       this.onAddLine(uniqueID, '', '')
       
       // adjust lines in chain
-      if (lastScene) this.scriptObj['scene__' + lastName].next = newScene
+      if (lastScene) this.scriptObj['scene__' + lastName].next = uniqueID
       else this.scriptObj.meta__startName = 'scene__' + uniqueID
-      if (nextScene) this.scriptObj['scene__' + nextName].previous = newScene
+      if (nextScene) this.scriptObj['scene__' + nextName].previous = uniqueID
       else this.scriptObj.meta__endName = 'scene__' + uniqueID
     }
   }
