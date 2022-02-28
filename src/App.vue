@@ -11,6 +11,7 @@
 
   <!-- section to display scenes for edit -->
   <div v-for='(scene, index) in getScenes()' :key="index">
+    (DEV) sceneID: {{ scene.keyName }}
     scene: <input v-model='scriptObj["scene__" + scene.keyName].name' />
     author: <input v-model='scriptObj["scene__" + scene.keyName].author' />
     lines: {{ getLines(scene).length }}
@@ -33,6 +34,7 @@
         <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
     <!-- section to display line for edit -->
     <div v-for='(line, index2) in getLines(scene)' :key='index2'>
+      (DEV) lineID: {{ line.keyName }}
       <!-- if not display same, show current display list, add new display char -->
       <input v-if='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].displaySame' type="checkbox" v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].displaySame' />same display ?
       <div v-if="!line.displaySame">
@@ -277,7 +279,6 @@ export default {
     getLines(scene) {
       var lineList = []
       var line = null
-      console.log(scene.meta__startName)
       for (const [key, value] of Object.entries(scene)) {
         if (key == scene.meta__startName) {
           line = value;
@@ -341,17 +342,17 @@ export default {
         previous: lastLine,
         displaySame: true
       }
-      // add previous display sprites by default
+      // add previous display sprites and speaker by default
       if (lastLine) {
         for (const [key, value] of Object.entries(lastLine)) {
           if (key.startsWith('sprite__')) {
             newLine['sprite__' + value.keyName] = value
           }
         }
+        newLine.speaker = lastLine.speaker
       }
       // add to script obj
       this.scriptObj['scene__' + sceneName]['line__' + uniqueID] = newLine
-      console.log(newLine)
       // adjust lines in chain
       if (lastLine) this.scriptObj['scene__' + sceneName]['line__' + lastName].next = newLine
       else this.scriptObj['scene__' + sceneName].meta__startName = 'line__' + uniqueID
