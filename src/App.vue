@@ -13,24 +13,24 @@
   <div v-for='(scene, index) in getScenes()' :key="index">
     scene: <input v-model='scriptObj["scene__" + scene.keyName].name' />
     author: <input v-model='scriptObj["scene__" + scene.keyName].author' />
+    lines: {{ getLines(scene).length }}
     <!-- bg section -->
+    background: {{ scriptObj["scene__" + scene.keyName].background }}
+    select background
+    <div v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
+        <button @click='selectBG(scene.keyName, bg)'>{{ bg }}</button>
+      </div>
+    add custom background
     <AddGlobalStuff @add-exp='onAddBG' v-bind:stuffType='"background"'/>
-    background:
-    <select v-model='scriptObj["scene__" + scene.keyName].background'>
-      <option disabled value="">new background - add above</option>
-      <div v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
-        <option>{{ bg }}</option>
-      </div>
-    </select>
+
     <!-- ost section  -->
-    <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
-    music:
-    <select v-model='scriptObj["scene__" + scene.keyName].ost'>
-      <option disabled value="">new music - add above</option>
-      <div v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
-        <option>{{ ost }}</option>
-      </div>
-    </select>
+    music: {{ scriptObj["scene__" + scene.keyName].ost }}
+    select music
+    <div v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
+        <button @click='selectOST(scene.keyName, ost)'>{{ ost }}</button>
+    </div>
+    add custom music
+        <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
     <!-- section to display line for edit -->
     <div v-for='(line, index2) in getLines(scene)' :key='index2'>
       <!-- if not display same, show current display list, add new display char -->
@@ -43,31 +43,34 @@
           :class='{ 
             incChara: scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included,
             notIncChara: !(scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included) }'>
-          chara display name: 
+          sprite's display name (if speaker): 
           <input v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].name' />
-          chara expression:
+          sprite expression: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].exp }}
           <!-- section for expressions -->
-          <select v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].exp'>
-            <option disabled value="">new expression - add below</option>
-            <div v-for='(charExp, index5) in getExpressions(sprite.keyName)' :key='index5'>
-              <option>{{ charExp }}</option>
-            </div>
-          </select>
+          select expression
+          <div v-for='(charExp, index5) in getExpressions(sprite.keyName)' :key='index5'>
+            <button @click='selectExpression(scene.keyName, line.keyName, sprite.keyName, charExp)'>{{ charExp }}</button>
+          </div>
+
+          add custom expression
           <!-- comp to add new global expression -->
           <AddGlobalStuff v-bind:stuffType='"expression"' v-bind:char='sprite.keyName' @add-exp='onAddExpression' />
-          chara pos
+          sprite position: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].pos }}
           <!-- section for positions -->
-          <select v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].pos'>
-            <option disabled value="">new position - add below</option>
-            <div v-for='(cPos, index6) in scriptObj.meta__posList' :key='index6'>
-              <option>{{ cPos }}</option>
-            </div>
-          </select>
+
+          select position
+          <div v-for='(cPos, index6) in scriptObj.meta__posList' :key='index6'>
+            <button @click='selectPosition(scene.keyName, line.keyName, sprite.keyName, cPos)'>{{ cPos }}</button>
+          </div>
+
+          add custom position
           <!-- comp to add new global position -->
           <AddGlobalStuff v-bind:stuffType='"position"' @add-exp='onAddPosition' />
-          <input type="checkbox" v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included' />include chara ?
+
+          <input type="checkbox" v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included' />include sprite ?
         </div>
         <!-- add new char to display -->
+        add sprite to display ?
         <div v-for='(gSprite, index9) in getAllSprites()' :key='index9'>
           <div v-if='!isSpriteAddedToLine(gSprite.keyName, line)'>
             <button @click='addSpriteToDisplay(scene.keyName, line.keyName, gSprite.keyName)'>{{ gSprite.name }}</button>
@@ -75,15 +78,14 @@
         </div>
       </div>
       <!-- comp to add new global character -->
+      add possible speaker
       <AddGlobalStuff v-bind:stuffType='"sprite"' @add-exp='onAddSprite' />
       <!-- speaker section -->
-      chara speaking:
-      <select v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].speaker'>
-        <option disabled value="">new speaker - add above</option>
-        <div v-for='(speaking, index8) in getAllSprites()' :key='index8'>
-          <option>{{ speaking }}</option>
+      speaker: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName].speaker.name }}
+      select speaker
+      <div v-for='(speaking, index8) in getAllSprites()' :key='index8'>
+          <button @click='selectSpeaker(scene.keyName, line.keyName, speaking)'>{{ speaking.name }}</button>
         </div>
-      </select>
       <!-- text section -->
       showing text:
         <textarea name="text" maxlength='350' placeholder="storytelling..." v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].text'></textarea>
@@ -126,9 +128,9 @@ export default {
       'meta__bgList'  : ['none'],
       'meta__ostList' : ['none'],
       // default narrator character
-      'char__narrator': {
+      'char____narrator': {
         keyName   : '__narrator',
-        name      : '',
+        name      : 'narrator',
         expList   : []
       },
       // linked list start end
@@ -144,7 +146,23 @@ export default {
     }
   },
   methods: {
+    selectBG(sceneName, bg) {
+      this.scriptObj["scene__" + sceneName].background = bg
+    },
+    selectOST(sceneName, ost) {
+      this.scriptObj["scene__" + sceneName].ost = ost
+    },
+    selectSpeaker(sceneName, lineName, speaker) {
+      this.scriptObj["scene__" + sceneName]["line__" + lineName].speaker = speaker
+    },
+    selectExpression(sceneName, lineName, spriteName, exp) {
+      this.scriptObj["scene__" + sceneName]["line__" + lineName]["sprite__" + spriteName].exp = exp
+    },
+    selectPosition(sceneName, lineName, spriteName, pos) {
+      this.scriptObj["scene__" + sceneName]["line__" + lineName]["sprite__" + spriteName].pos = pos
+    },
     isSpriteAddedToLine(spriteName, line) {
+      if (spriteName == "__narrator") return true
       for (var sp of this.getSprites(line)) {
         if (sp.keyName == spriteName) return true;
       }
@@ -173,7 +191,7 @@ export default {
       this.scriptObj['scene__' + sceneName]['line__' + lineName]['sprite__' + spriteName] = spriteObj
     },
     onAddSprite(spObj) {
-      if (spObj.sprite == 'narrator') {
+      if (spObj.sprite == '__narrator') {
         return;
       }
       for (const [key, value] of Object.entries(this.scriptObj)) {
@@ -259,6 +277,7 @@ export default {
     getLines(scene) {
       var lineList = []
       var line = null
+      console.log(scene.meta__startName)
       for (const [key, value] of Object.entries(scene)) {
         if (key == scene.meta__startName) {
           line = value;
@@ -316,7 +335,7 @@ export default {
       var uniqueID = uuidv4(); // ⇨ '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
       var newLine = {
         keyName : uniqueID,
-        speaker: '',
+        speaker: this.scriptObj.char____narrator,
         text: '',
         next: nextLine,
         previous: lastLine,
@@ -332,11 +351,12 @@ export default {
       }
       // add to script obj
       this.scriptObj['scene__' + sceneName]['line__' + uniqueID] = newLine
+      console.log(newLine)
       // adjust lines in chain
       if (lastLine) this.scriptObj['scene__' + sceneName]['line__' + lastName].next = newLine
-      else this.scriptObj['scene__' + sceneName].meta__startName = newLine
+      else this.scriptObj['scene__' + sceneName].meta__startName = 'line__' + uniqueID
       if (nextLine) this.scriptObj['scene__' + sceneName]['line__' + nextName].previous = newLine
-      else this.scriptObj['scene__' + sceneName].meta__endName = newLine
+      else this.scriptObj['scene__' + sceneName].meta__endName = 'line__' + uniqueID
     },
     // unique indexed keyname
     // editable name
@@ -357,8 +377,8 @@ export default {
         keyName : uniqueID,
         next: nextScene,
         previous: lastScene,
-        background: 'none',
-        ost: 'none'
+        background: this.scriptObj.meta__bgList[0],
+        ost: this.scriptObj.meta__ostList[0]
       }
 
       // add to script obj
