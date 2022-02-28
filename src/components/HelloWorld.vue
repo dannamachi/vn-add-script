@@ -26,7 +26,7 @@ export default {
               deleteDict[key][key1] = {}
               for (const [key2, value2] of Object.entries(value1)) {
                 if (key2.startsWith('sprite__')) {
-                  if (!key2.included) {
+                  if (!value2.included) {
                     deleteDict[key][key1][key2] = value2
                   }
                 }
