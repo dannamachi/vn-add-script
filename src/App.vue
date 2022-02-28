@@ -10,11 +10,88 @@
   <p>charas: {{ scriptObj.meta__ccount - 1 }} charas (excluding default narrator)</p>
 
   <!-- section to display scenes for edit -->
-  <div v-for='(scene, index) in getScenes()' :key="index">
-    (DEV) sceneID: {{ scene.keyName }}
-    scene: <input v-model='scriptObj["scene__" + scene.keyName].name' />
-    author: <input v-model='scriptObj["scene__" + scene.keyName].author' />
-    lines: {{ getLines(scene).length }}
+  <div class='card' v-for='(scene, index) in getScenes()' :key="index">
+    <!-- (DEV) sceneID: {{ scene.keyName }} -->
+    <div class='card-header'>scene: <input v-model='scriptObj["scene__" + scene.keyName].name' /></div>
+    <!-- section to display line for edit -->
+    <div class='card-body'>
+      <div class='card' v-for='(line, index2) in getLines(scene)' :key='index2'>
+        <!-- (DEV) lineID: {{ line.keyName }} -->
+        <!-- if not display same, show current display list, add new display char -->
+
+        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
+          toggle show sprite info
+        </button>
+        <div class='collapse' id="collapseExample">
+
+        <!-- show current display sprites -->
+        <div 
+          v-for='(sprite, index4) in getSprites(line)' 
+          :key='index4' 
+          :class='{ 
+            incChara: scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included,
+            notIncChara: !(scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included) }'>
+          sprite's display name (if speaker): 
+          <input v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].name' />
+          sprite expression: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].exp }}
+          <!-- section for expressions -->
+          select expression
+          <div v-for='(charExp, index5) in getExpressions(sprite.keyName)' :key='index5'>
+            <button @click='selectExpression(scene.keyName, line.keyName, sprite.keyName, charExp)'>{{ charExp }}</button>
+          </div>
+
+          add custom expression
+          <!-- comp to add new global expression -->
+          <AddGlobalStuff v-bind:stuffType='"expression"' v-bind:char='sprite.keyName' @add-exp='onAddExpression' />
+          sprite position: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].pos }}
+          <!-- section for positions -->
+
+          select position
+          <div v-for='(cPos, index6) in scriptObj.meta__posList' :key='index6'>
+            <button @click='selectPosition(scene.keyName, line.keyName, sprite.keyName, cPos)'>{{ cPos }}</button>
+          </div>
+
+          add custom position
+          <!-- comp to add new global position -->
+          <AddGlobalStuff v-bind:stuffType='"position"' @add-exp='onAddPosition' />
+
+          <input type="checkbox" v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included' />include sprite ?
+        </div>
+        <!-- add new char to display -->
+        add sprite to display ?
+        <div v-for='(gSprite, index9) in getAllSprites()' :key='index9'>
+          <div v-if='!isSpriteAddedToLine(gSprite.keyName, line)'>
+            <button @click='addSpriteToDisplay(scene.keyName, line.keyName, gSprite.keyName)'>{{ gSprite.name }}</button>
+          </div>
+        </div>
+
+          <!-- <b-card>
+            <p class="card-text">Collapse contents Here</p>
+          </b-card> -->
+        </div>
+
+        <!-- comp to add new global character -->
+        add possible speaker
+        <AddGlobalStuff v-bind:stuffType='"sprite"' @add-exp='onAddSprite' />
+        <!-- speaker section -->
+        speaker: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName].speaker.name }}
+        select speaker
+        <div v-for='(speaking, index8) in getAllSprites()' :key='index8'>
+            <button @click='selectSpeaker(scene.keyName, line.keyName, speaking)'>{{ speaking.name }}</button>
+          </div>
+        <!-- text section -->
+        showing text:
+          <textarea name="text" maxlength='350' placeholder="storytelling..." v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].text'></textarea>
+        <p>-----</p>
+        <!-- button to add line (indexed unique name) -->
+        <button @click='onAddLine(scene.keyName, line.keyName, line.next)'>Add Line</button>
+        <p>-----</p>
+      </div>
+    </div>
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseBGOST" aria-expanded="false" aria-controls="BGOST">
+        toggle background and music
+    </button>
+    <div class='collapse' id='collapseBGOST'>
     <!-- bg section -->
     background: {{ scriptObj["scene__" + scene.keyName].background }}
     select background
@@ -31,80 +108,9 @@
         <button @click='selectOST(scene.keyName, ost)'>{{ ost }}</button>
     </div>
     add custom music
-        <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
-    <!-- section to display line for edit -->
-    <div v-for='(line, index2) in getLines(scene)' :key='index2'>
-      (DEV) lineID: {{ line.keyName }}
-      <!-- if not display same, show current display list, add new display char -->
-
-      <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" aria-expanded="false" aria-controls="collapseExample">
-        toggle show sprite info
-      </button>
-      <div class='collapse' id="collapseExample">
-
-      <!-- show current display sprites -->
-      <div 
-        v-for='(sprite, index4) in getSprites(line)' 
-        :key='index4' 
-        :class='{ 
-          incChara: scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included,
-          notIncChara: !(scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included) }'>
-        sprite's display name (if speaker): 
-        <input v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].name' />
-        sprite expression: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].exp }}
-        <!-- section for expressions -->
-        select expression
-        <div v-for='(charExp, index5) in getExpressions(sprite.keyName)' :key='index5'>
-          <button @click='selectExpression(scene.keyName, line.keyName, sprite.keyName, charExp)'>{{ charExp }}</button>
-        </div>
-
-        add custom expression
-        <!-- comp to add new global expression -->
-        <AddGlobalStuff v-bind:stuffType='"expression"' v-bind:char='sprite.keyName' @add-exp='onAddExpression' />
-        sprite position: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].pos }}
-        <!-- section for positions -->
-
-        select position
-        <div v-for='(cPos, index6) in scriptObj.meta__posList' :key='index6'>
-          <button @click='selectPosition(scene.keyName, line.keyName, sprite.keyName, cPos)'>{{ cPos }}</button>
-        </div>
-
-        add custom position
-        <!-- comp to add new global position -->
-        <AddGlobalStuff v-bind:stuffType='"position"' @add-exp='onAddPosition' />
-
-        <input type="checkbox" v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included' />include sprite ?
-      </div>
-      <!-- add new char to display -->
-      add sprite to display ?
-      <div v-for='(gSprite, index9) in getAllSprites()' :key='index9'>
-        <div v-if='!isSpriteAddedToLine(gSprite.keyName, line)'>
-          <button @click='addSpriteToDisplay(scene.keyName, line.keyName, gSprite.keyName)'>{{ gSprite.name }}</button>
-        </div>
-      </div>
-
-        <!-- <b-card>
-          <p class="card-text">Collapse contents Here</p>
-        </b-card> -->
-      </div>
-
-      <!-- comp to add new global character -->
-      add possible speaker
-      <AddGlobalStuff v-bind:stuffType='"sprite"' @add-exp='onAddSprite' />
-      <!-- speaker section -->
-      speaker: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName].speaker.name }}
-      select speaker
-      <div v-for='(speaking, index8) in getAllSprites()' :key='index8'>
-          <button @click='selectSpeaker(scene.keyName, line.keyName, speaking)'>{{ speaking.name }}</button>
-        </div>
-      <!-- text section -->
-      showing text:
-        <textarea name="text" maxlength='350' placeholder="storytelling..." v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].text'></textarea>
-      <p>-----</p>
-      <!-- button to add line (indexed unique name) -->
-      <button @click='onAddLine(scene.keyName, line.keyName, line.next)'>Add Line</button>
-      <p>-----</p>
+    <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
     </div>
+    <div class='card-footer text-muted'>author: <input v-model='scriptObj["scene__" + scene.keyName].author' />, lines: {{ getLines(scene).length }}</div>
     <p>=========</p>
     <!-- button to add line (indexed unique name) -->
     <button @click='onAddScene(scene.keyName, scene.next)'>Add Scene</button>
