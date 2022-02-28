@@ -25,7 +25,7 @@ export default {
                     this.$emit("addExp", {
                         pos: this.newExp
                     })
-                } else if (this.stuffType == 'sprite') {
+                } else if (this.stuffType == 'character') {
                     this.$emit("addExp", {
                         sprite: this.newExp
                     })
