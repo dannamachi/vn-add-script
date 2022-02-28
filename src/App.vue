@@ -19,9 +19,6 @@
         <!-- (DEV) lineID: {{ line.keyName }} -->
         <!-- if not display same, show current display list, add new display char -->
 
-        <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" :data-bs-target="'#1collapseExample'+line.keyName" aria-expanded="false" :aria-controls="'collapseExample'+line.keyName">
-          toggle show sprite info
-        </button>
         <div class='container-lg' :id="'collapseExample' + line.keyName">
 
           <div class='row'>
@@ -127,34 +124,40 @@
     <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapseBGOST' + scene.keyName" aria-expanded="false" :aria-controls="'collapseBGOST' + scene.keyName">
         toggle background and music
     </button>
-    <div class='collapse' :id='"collapseBGOST" + scene.keyName'>
-    <!-- bg section -->
-    background: {{ scriptObj["scene__" + scene.keyName].background }}
-    <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonBG'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-        select background
-      </button>
-      <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonBG'+scene.keyName">
-        <li v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
-          <button type='button' class='dropdown-item'  @click='selectBG(scene.keyName, bg)'>{{ bg }}</button>
-        </li>
-      </ul>
-    </div>
-    <AddGlobalStuff @add-exp='onAddBG' v-bind:stuffType='"background"'/>
+    <div class='collapse container-lg' :id='"collapseBGOST" + scene.keyName'>
+      <div class='row'>
+        <!-- bg section -->
+        <div class='col'>
+          background: {{ scriptObj["scene__" + scene.keyName].background }}
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonBG'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+              select background
+            </button>
+            <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonBG'+scene.keyName">
+              <li v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
+                <button type='button' class='dropdown-item'  @click='selectBG(scene.keyName, bg)'>{{ bg }}</button>
+              </li>
+            </ul>
+          </div>
+          <AddGlobalStuff @add-exp='onAddBG' v-bind:stuffType='"background"'/>
+        </div>
 
-    <!-- ost section  -->
-    music: {{ scriptObj["scene__" + scene.keyName].ost }}
-    <div class="dropdown">
-      <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonOST'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-        select music
-      </button>
-      <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonOST'+scene.keyName">
-        <li v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
-          <button type='button' class='dropdown-item'  @click='selectOST(scene.keyName, ost)'>{{ ost }}</button>
-        </li>
-      </ul>
-    </div>
-    <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
+        <!-- ost section  -->
+        <div class='col'>
+          music: {{ scriptObj["scene__" + scene.keyName].ost }}
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonOST'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+              select music
+            </button>
+            <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonOST'+scene.keyName">
+              <li v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
+                <button type='button' class='dropdown-item'  @click='selectOST(scene.keyName, ost)'>{{ ost }}</button>
+              </li>
+            </ul>
+          </div>
+          <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
+        </div>
+      </div>
     </div>
     <div class='card-footer text-muted'>author: <input v-model='scriptObj["scene__" + scene.keyName].author' />, lines: {{ getLines(scene).length }}</div>
     <!-- button to add line (indexed unique name) -->
