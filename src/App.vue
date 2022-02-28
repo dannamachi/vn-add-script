@@ -1,5 +1,5 @@
 <template>
-  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+  <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">
         <img alt="my logo" src="./assets/icon_cropped.png" width='30' height='30'>
@@ -8,7 +8,7 @@
         <span class="navbar-toggler-icon"></span>
       </button>
       <div class="collapse navbar-collapse" id="navbarScroll">
-        <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+        <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
           <!-- script info nav -->
           <li class="nav-item">
             <a class="nav-link" href="#scriptInfo">{{ scriptObj.meta__name }}</a>
@@ -22,12 +22,18 @@
               scenes
             </a>
             <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
-              <!-- <li><button class="dropdown-item" href="#">Something else here</button></li> -->
-              <li><hr class="dropdown-divider"></li>
               <li v-for='(sceneLink, index20) in getScenes()' :key="index20">
                 <a class='dropdown-item' :href='"#sceneHeading"+sceneLink.keyName'>{{ sceneLink.name }}</a>
               </li>
             </ul>
+          </li>
+          <!-- add scene -->
+          <li class='nav-item'>
+            <button class="btn btn-primary" @click='addNewScene()'>Add Scene</button>
+          </li>
+          <!-- download -->
+          <li class='nav-item'>
+              <HelloWorld v-bind:jsonArr='scriptObj' />
           </li>
         </ul>
       </div>
@@ -224,8 +230,6 @@
 
   </div>
 
-  <!-- component to download json -->
-  <HelloWorld v-bind:jsonArr='scriptObj' />
 </template>
 
 <script>
@@ -266,11 +270,17 @@ export default {
   },
   created() {
     // create new scene upon init
-    if (this.getScenes().length == 0) {
-      this.onAddScene('', '')
-    }
+    this.addNewScene()
   },
   methods: {
+    addNewScene() {
+      var allScenes = this.getScenes()
+      if (allScenes.length == 0) {
+        this.onAddScene('', '')
+      } else {
+        this.onAddScene(allScenes[allScenes.length-1].keyName, '')
+      }
+    },
     selectBG(sceneName, bg) {
       this.scriptObj["scene__" + sceneName].background = bg
     },
