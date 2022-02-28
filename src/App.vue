@@ -22,52 +22,56 @@
         <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapseExample'+line.keyName" aria-expanded="false" :aria-controls="'collapseExample'+line.keyName">
           toggle show sprite info
         </button>
-        <div class='collapse' :id="'collapseExample' + line.keyName">
+        <div class='collapse container-lg' :id="'collapseExample' + line.keyName">
 
-        <!-- show current display sprites -->
-        <div 
-          v-for='(sprite, index4) in getSprites(line)' 
-          :key='index4' 
-          :class='{ 
-            incChara: scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included,
-            notIncChara: !(scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included) }'>
-          sprite's display name (if speaker): 
-          <input v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].name' />
-          sprite expression: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].exp }}
-          <!-- section for expressions -->
-          select expression
-          <div v-for='(charExp, index5) in getExpressions(sprite.keyName)' :key='index5'>
-            <button @click='selectExpression(scene.keyName, line.keyName, sprite.keyName, charExp)'>{{ charExp }}</button>
+          <div class='row'>
+            <!-- show current display sprites -->
+            <div 
+              v-for='(sprite, index4) in getSprites(line)' 
+              :key='index4' 
+              class='card col-lg-auto'>
+              <div class='card-header'>
+                {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].name }} ({{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].exp }})
+              </div>
+              <div class='card-body'>
+                <!-- section for expressions -->
+                select expression
+                <div v-for='(charExp, index5) in getExpressions(sprite.keyName)' :key='index5'>
+                  <button @click='selectExpression(scene.keyName, line.keyName, sprite.keyName, charExp)'>{{ charExp }}</button>
+                </div>
+
+                add expression
+                <!-- comp to add new global expression -->
+                <AddGlobalStuff v-bind:stuffType='"expression"' v-bind:char='sprite.keyName' @add-exp='onAddExpression' />
+
+                <!-- section for positions -->
+
+                select position
+                <div v-for='(cPos, index6) in scriptObj.meta__posList' :key='index6'>
+                  <button @click='selectPosition(scene.keyName, line.keyName, sprite.keyName, cPos)'>{{ cPos }}</button>
+                </div>
+
+                add position
+                <!-- comp to add new global position -->
+                <AddGlobalStuff v-bind:stuffType='"position"' @add-exp='onAddPosition' />
+
+                <button class='btn btn-link' type='button' @click='removeSpriteFromDisplay(scene.keyName, line.keyName, sprite.keyName)'>Remove</button>
+
+                <!-- <input type="checkbox" v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included' />displayed -->
+              </div>
+              <div class='card-footer'>
+                {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].pos }}
+              </div>
+            </div>
+          </div>
+          <!-- add new char to display -->
+          add sprite to display ?
+          <div v-for='(gSprite, index9) in getAllSprites()' :key='index9'>
+            <div v-if='!isSpriteAddedToLine(gSprite.keyName, line)'>
+              <button @click='addSpriteToDisplay(scene.keyName, line.keyName, gSprite.keyName)'>{{ gSprite.name }}</button>
+            </div>
           </div>
 
-          add custom expression
-          <!-- comp to add new global expression -->
-          <AddGlobalStuff v-bind:stuffType='"expression"' v-bind:char='sprite.keyName' @add-exp='onAddExpression' />
-          sprite position: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].pos }}
-          <!-- section for positions -->
-
-          select position
-          <div v-for='(cPos, index6) in scriptObj.meta__posList' :key='index6'>
-            <button @click='selectPosition(scene.keyName, line.keyName, sprite.keyName, cPos)'>{{ cPos }}</button>
-          </div>
-
-          add custom position
-          <!-- comp to add new global position -->
-          <AddGlobalStuff v-bind:stuffType='"position"' @add-exp='onAddPosition' />
-
-          <input type="checkbox" v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included' />include sprite ?
-        </div>
-        <!-- add new char to display -->
-        add sprite to display ?
-        <div v-for='(gSprite, index9) in getAllSprites()' :key='index9'>
-          <div v-if='!isSpriteAddedToLine(gSprite.keyName, line)'>
-            <button @click='addSpriteToDisplay(scene.keyName, line.keyName, gSprite.keyName)'>{{ gSprite.name }}</button>
-          </div>
-        </div>
-
-          <!-- <b-card>
-            <p class="card-text">Collapse contents Here</p>
-          </b-card> -->
         </div>
 
         <!-- comp to add new global character -->
@@ -182,15 +186,18 @@ export default {
     isSpriteAddedToLine(spriteName, line) {
       if (spriteName == "__narrator") return true
       for (var sp of this.getSprites(line)) {
-        if (sp.keyName == spriteName) return true;
+        if (sp.keyName == spriteName && sp.included) return true;
       }
       return false;
+    },
+    removeSpriteFromDisplay(sceneName, lineName, spriteName) {
+      this.scriptObj['scene__' + sceneName]['line__' + lineName]['sprite__' + spriteName].included = false
     },
     addSpriteToDisplay(sceneName, lineName, spriteName) {
       // check sprite not alr added
       for (const[key2, value2] of Object.entries(this.scriptObj['scene__' + sceneName]['line__' + lineName])) {
         value2
-        if (key2 == 'sprite__' + spriteName) {
+        if (key2 == 'sprite__' + spriteName && value2.included) {
           return;
         }
       }
@@ -286,7 +293,7 @@ export default {
     getSprites(line) {
       var sList = []
       for (const [key, value] of Object.entries(line)) {
-        if (key.startsWith('sprite__')) {
+        if (key.startsWith('sprite__') && value.included) {
           sList.push(value)
         }
       }
@@ -360,7 +367,7 @@ export default {
       // add previous display sprites and speaker by default
       if (lastLine) {
         for (const [key, value] of Object.entries(lastLine)) {
-          if (key.startsWith('sprite__')) {
+          if (key.startsWith('sprite__') && value.included) {
             newLine['sprite__' + value.keyName] = clone(value)
           }
         }
@@ -422,13 +429,5 @@ export default {
   text-align: center;
   color: #2c3e50;
   margin-top: 60px;
-}
-
-.incChara {
-  text-decoration: none;
-}
-
-.notIncChara {
-  text-decoration: line-through;
 }
 </style>
