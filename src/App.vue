@@ -1,13 +1,54 @@
 <template>
-  <img alt="my logo" src="./assets/icon_cropped.png" width='200' height='200'>
-  <h2>script:
-    <input v-model='scriptObj.meta__name' />
-  </h2>
-  <p>author: 
-    <input v-model='scriptObj.meta__author' />
-  </p>
-  <p>scenes: {{ scriptObj.meta__scount }} scene(s)</p>
-  <p>charas: {{ scriptObj.meta__ccount - 1 }} charas (excluding default narrator)</p>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">
+        <img alt="my logo" src="./assets/icon_cropped.png" width='30' height='30'>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarScroll" aria-controls="navbarScroll" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarScroll">
+        <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll" style="--bs-scroll-height: 100px;">
+          <!-- script info nav -->
+          <li class="nav-item">
+            <a class="nav-link" href="#scriptInfo">{{ scriptObj.meta__name }}</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="#scriptInfo">{{ scriptObj.meta__author }}</a>
+          </li>
+          <!-- scene list -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+              scenes
+            </a>
+            <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
+              <!-- <li><button class="dropdown-item" href="#">Something else here</button></li> -->
+              <li><hr class="dropdown-divider"></li>
+              <li v-for='(sceneLink, index20) in getScenes()' :key="index20">
+                <a class='dropdown-item' :href='"#sceneHeading"+sceneLink.keyName'>{{ sceneLink.name }}</a>
+              </li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <!-- script info -->
+  <div class='card' id='scriptInfo'>
+    <div class='card-header'>script info</div>
+    <div class='card-body'>
+      <p>name: 
+        <input v-model='scriptObj.meta__name' />
+      </p>
+      <p>author: 
+        <input v-model='scriptObj.meta__author' />
+      </p>
+    <div class='card-footer'>
+      {{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)
+    </div>
+    </div>
+  </div>
 
   <!-- accordion for scene list -->
   <div class="accordion card" id="sceneList">
