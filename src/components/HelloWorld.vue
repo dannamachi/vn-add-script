@@ -7,6 +7,8 @@
 </template>
 
 <script>
+import clone from 'just-clone';
+
 export default {
   name: 'HelloWorld',
   props: {
@@ -15,7 +17,7 @@ export default {
   methods: {
     cleanObject() {
       var deleteDict = {}
-      var exportObject = JSON.parse(JSON.stringify(this.jsonArr))
+      var exportObject = clone(this.jsonArr)
       for (const [key, value] of Object.entries(exportObject)) {
         if (key.startsWith('scene__')) {
           deleteDict[key] = {}
@@ -34,11 +36,11 @@ export default {
         }
       }
 
-      for (const [x,y] of Object.entries(deleteDict)) {
-        for (const [m,n] of Object.entries(y)) {
-          for (var _ of n) {
-            _
-            delete exportObject[x][m][n]
+      for (const [scene,stuff1] of Object.entries(deleteDict)) {
+        for (const [line,stuff2] of Object.entries(stuff1)) {
+          for (const [sprite, stuff3] of Object.entries(stuff2)) {
+            stuff3
+            delete exportObject[scene][line][sprite]
           }
         }
       }
@@ -48,8 +50,7 @@ export default {
     },
     downloadJson() {
       var exportObj = this.cleanObject()
-      var dateStr = exportObj.meta__updated.getFullYear() + exportObj.meta__updated.getMonth() + exportObj.meta__updated.getDate()
-      require("downloadjs")(JSON.stringify(exportObj), dateStr + "__" + exportObj.meta__name + "__" + exportObj.meta__author + ".json", "text/plain");
+      require("downloadjs")(JSON.stringify(exportObj), exportObj.meta__name + "__" + exportObj.meta__author + ".json", "text/plain");
     }
   }
 }
