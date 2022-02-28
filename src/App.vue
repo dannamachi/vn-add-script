@@ -9,12 +9,13 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarScroll">
         <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
+          <!-- load script -->
+          <li class="nav-item">
+            <a class='nav-link' href='#loadScript'>Load Script</a>
+          </li>
           <!-- script info nav -->
           <li class="nav-item">
             <a class="nav-link" href="#scriptInfo">{{ scriptObj.meta__name }}</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="#scriptInfo">{{ scriptObj.meta__author }}</a>
           </li>
           <!-- scene list -->
           <li class="nav-item dropdown">
@@ -53,6 +54,16 @@
     <div class='card-footer'>
       {{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)
     </div>
+    </div>
+  </div>
+  <div class='card' id='loadScript'>
+    <div class='card-header'>new script</div>
+    <div class='card-body'>
+      <div v-if='errMsg != ""' class="alert alert-danger" role="alert">
+        {{ errMsg }}
+      </div>
+      <textarea name="text" placeholder="paste script text here..." v-model='inputJSON'></textarea>
+      <p><button class='btn btn-info' type='button' @click='loadScript()'>Load Script</button></p>
     </div>
   </div>
 
@@ -268,11 +279,61 @@ export default {
     })
     return { scriptObj }
   },
+  data() {
+    return {
+      inputJSON: "",
+      errMsg: ""
+    }
+  },
+  watch: {
+    inputJSON: function() {
+      this.errMsg = ""
+    }
+  },
   created() {
     // create new scene upon init
     this.addNewScene()
   },
   methods: {
+    checkScript(script) {
+      var sceneCount = 0;
+      var charCount = 0;
+      // all meta fields
+      for (const [key, value] of Object.entries(this.scriptObj)) {
+        value
+        if (key.startsWith('meta__' && !script[key])) {
+          return false;
+        }
+      }
+      // count scene and char
+      for (const[key1, value1] of Object.entries(script)) {
+        value1
+        if (key1.startsWith('scene__')) sceneCount += 1
+        if (key1.startsWith('char__')) charCount += 1
+      }
+      if (sceneCount != script.meta__scount) return false
+      if (charCount != script.meta__ccount) return false
+      return true
+    },
+    loadScript() {
+      try {
+        var script = JSON.parse(this.inputJSON)
+        if (!this.checkScript(script)) return
+        else {
+          for (const [key1, value1] of Object.entries(this.scriptObj)) {
+            value1
+            if (!script[key1]) delete this.scriptObj[key1]
+          }
+          console.log(this.scriptObj)
+          for (const [key, value] of Object.entries(script)) {
+            this.scriptObj[key] = value
+          }
+        }
+      }
+      catch(err) {
+        this.errMsg = 'invalid script text !'
+      }
+    },
     addNewScene() {
       var allScenes = this.getScenes()
       if (allScenes.length == 0) {
