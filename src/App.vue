@@ -9,159 +9,178 @@
   <p>scenes: {{ scriptObj.meta__scount }} scene(s)</p>
   <p>charas: {{ scriptObj.meta__ccount - 1 }} charas (excluding default narrator)</p>
 
-  <!-- section to display scenes for edit -->
-  <div class='card' v-for='(scene, index) in getScenes()' :key="index">
-    <!-- (DEV) sceneID: {{ scene.keyName }} -->
-    <div class='card-header'>scene: <input v-model='scriptObj["scene__" + scene.keyName].name' /></div>
-    <!-- section to display line for edit -->
-    <div class='card-body'>
-      <div class='card' v-for='(line, index2) in getLines(scene)' :key='index2'>
-        <!-- (DEV) lineID: {{ line.keyName }} -->
-        <!-- if not display same, show current display list, add new display char -->
+  <!-- accordion for scene list -->
+  <div class="accordion card" id="sceneList">
 
-        <div class='container-lg' :id="'collapseExample' + line.keyName">
+    <div class="accordion-item card" v-for='(scene, index) in getScenes()' :key="index">
+      <h3 class='accordion-header' :id='"sceneHeading"+scene.keyName'>
+        <button class='accordion-button' type='button' data-bs-toggle='collapse' :data-bs-target='"#sceneCollapse"+scene.keyName' aria-expanded="true" :aria-controls='"sceneCollapse"+scene.keyName'>
+          {{ scriptObj["scene__" + scene.keyName].name }}
+        </button>
+      </h3>
+        <div :id='"sceneCollapse"+scene.keyName' class="accordion-collapse collapse" :aria-labelledby='"sceneHeading"+scene.keyName' data-bs-parent="#sceneList">
+          <div class='accordion-body'>
 
-          <div class='row'>
-            <!-- show current display sprites -->
-            <div class='col-sm-8'>
-              <div v-if='getSprites(line) == 0'>no sprite displayed</div>
+            <!-- (DEV) sceneID: {{ scene.keyName }} -->
+            <div class='card-header'><input v-model='scriptObj["scene__" + scene.keyName].name' /></div>
+
+            <!-- section to display line for edit -->
+            <div class='card-body'>
+              <div class='card' v-for='(line, index2) in getLines(scene)' :key='index2'>
+                <!-- (DEV) lineID: {{ line.keyName }} -->
+                <!-- if not display same, show current display list, add new display char -->
+
+                <div class='container-lg' :id="'collapseExample' + line.keyName">
+
+                  <div class='row'>
+                    <!-- show current display sprites -->
+                    <div class='col-sm-8'>
+                      <div v-if='getSprites(line) == 0'>no sprite displayed</div>
+                      <div class='row'>
+                        <div 
+                          v-for='(sprite, index4) in getSprites(line)' 
+                          :key='index4' 
+                          class='card col'>
+                          <div class='card-header'>
+                            {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].name }} ({{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].exp }})
+                          </div>
+                          <div class='card-body'>
+                            <!-- section for expressions -->
+                            <div class="dropdown">
+                              <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonExpression'+scene.keyName+line.keyName+sprite.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                                select expression
+                              </button>
+                              <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonExpression'+scene.keyName+line.keyName+sprite.keyName">
+                                <li v-for='(charExp, index5) in getExpressions(sprite.keyName)' :key='index5'>
+                                  <button type='button' class='dropdown-item' @click='selectExpression(scene.keyName, line.keyName, sprite.keyName, charExp)'>{{ charExp }}</button>
+                                </li>
+                              </ul>
+                            </div>
+
+                            <!-- comp to add new global expression -->
+                            <AddGlobalStuff v-bind:stuffType='"expression"' v-bind:char='sprite.keyName' @add-exp='onAddExpression' />
+
+                            <!-- section for positions -->
+                            <div class="dropdown">
+                              <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonPosition'+scene.keyName+line.keyName+sprite.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                                select position
+                              </button>
+                              <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonPosition'+scene.keyName+line.keyName+sprite.keyName">
+                                <li v-for='(cPos, index6) in scriptObj.meta__posList' :key='index6'>
+                                  <button type='button' class='dropdown-item' @click='selectPosition(scene.keyName, line.keyName, sprite.keyName, cPos)'>{{ cPos }}</button>
+                                </li>
+                              </ul>
+                            </div>
+
+                            <!-- comp to add new global position -->
+                            <AddGlobalStuff v-bind:stuffType='"position"' @add-exp='onAddPosition' />
+
+                            <button class='btn btn-link' type='button' @click='removeSpriteFromDisplay(scene.keyName, line.keyName, sprite.keyName)'>Remove</button>
+
+                            <!-- <input type="checkbox" v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included' />displayed -->
+                          </div>
+                          <div class='card-footer'>
+                            {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].pos }}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class='card col-sm-4'>
+                      <!-- speaker section -->
+                      <div class='card-header'> {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName].speaker.name }}</div>
+
+                      <!-- text section -->
+                      <textarea class='card-body' name="text" maxlength='350' placeholder="storytelling..." v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].text'></textarea>
+                    </div>
+
+                  </div>
+                  <div class='row'>
+                    <!-- add new char to display -->
+                    <div class='col' v-if="getSprites(line).length >= 3">3 sprites only !</div>
+                    <div class='col dropdown' v-else>
+                      <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonDisplayAdd'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                        add sprite
+                      </button>
+                      <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonDisplayAdd'+scene.keyName+line.keyName">
+                        <li v-for='(gSprite, index9) in getAllSprites()' :key='index9'>
+                          <div v-if='!isSpriteAddedToLine(gSprite.keyName, line)'>
+                            <button type='button' class='dropdown-item' @click='addSpriteToDisplay(scene.keyName, line.keyName, gSprite.keyName)'>{{ gSprite.name }}</button>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+
+                    <!-- comp to add new global character -->
+                    <AddGlobalStuff class='col' v-bind:stuffType='"character"' @add-exp='onAddSprite' />
+
+                    <!-- change speaker -->
+                    <div class="dropdown col">
+                      <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonSpeaker'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                        select speaker
+                      </button>
+                      <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonSpeaker'+scene.keyName+line.keyName">
+                        <li v-for='(speaking, index8) in getAllSprites()' :key='index8'>
+                          <button type='button' class='dropdown-item' @click='selectSpeaker(scene.keyName, line.keyName, speaking)'>{{ speaking.name }}</button>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- button to add line (indexed unique name) -->
+                <button class="btn btn-primary" @click='onAddLine(scene.keyName, line.keyName, line.next)'>Add Line</button>
+              </div>
+            </div>
+
+            <!-- bg and ost section -->
+            <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapseBGOST' + scene.keyName" aria-expanded="false" :aria-controls="'collapseBGOST' + scene.keyName">
+              toggle background and music
+            </button>
+            <div class='collapse container-lg' :id='"collapseBGOST" + scene.keyName'>
               <div class='row'>
-                <div 
-                  v-for='(sprite, index4) in getSprites(line)' 
-                  :key='index4' 
-                  class='card col'>
-                  <div class='card-header'>
-                    {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].name }} ({{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].exp }})
+                <!-- bg section -->
+                <div class='col'>
+                  background: {{ scriptObj["scene__" + scene.keyName].background }}
+                  <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonBG'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                      select background
+                    </button>
+                    <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonBG'+scene.keyName">
+                      <li v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
+                        <button type='button' class='dropdown-item'  @click='selectBG(scene.keyName, bg)'>{{ bg }}</button>
+                      </li>
+                    </ul>
                   </div>
-                  <div class='card-body'>
-                    <!-- section for expressions -->
-                    <div class="dropdown">
-                      <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonExpression'+scene.keyName+line.keyName+sprite.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-                        select expression
-                      </button>
-                      <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonExpression'+scene.keyName+line.keyName+sprite.keyName">
-                        <li v-for='(charExp, index5) in getExpressions(sprite.keyName)' :key='index5'>
-                          <button type='button' class='dropdown-item' @click='selectExpression(scene.keyName, line.keyName, sprite.keyName, charExp)'>{{ charExp }}</button>
-                        </li>
-                      </ul>
-                    </div>
+                  <AddGlobalStuff @add-exp='onAddBG' v-bind:stuffType='"background"'/>
+                </div>
 
-                    <!-- comp to add new global expression -->
-                    <AddGlobalStuff v-bind:stuffType='"expression"' v-bind:char='sprite.keyName' @add-exp='onAddExpression' />
-
-                    <!-- section for positions -->
-                    <div class="dropdown">
-                      <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonPosition'+scene.keyName+line.keyName+sprite.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-                        select position
-                      </button>
-                      <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonPosition'+scene.keyName+line.keyName+sprite.keyName">
-                        <li v-for='(cPos, index6) in scriptObj.meta__posList' :key='index6'>
-                          <button type='button' class='dropdown-item' @click='selectPosition(scene.keyName, line.keyName, sprite.keyName, cPos)'>{{ cPos }}</button>
-                        </li>
-                      </ul>
-                    </div>
-
-                    <!-- comp to add new global position -->
-                    <AddGlobalStuff v-bind:stuffType='"position"' @add-exp='onAddPosition' />
-
-                    <button class='btn btn-link' type='button' @click='removeSpriteFromDisplay(scene.keyName, line.keyName, sprite.keyName)'>Remove</button>
-
-                    <!-- <input type="checkbox" v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].included' />displayed -->
+                <!-- ost section  -->
+                <div class='col'>
+                  music: {{ scriptObj["scene__" + scene.keyName].ost }}
+                  <div class="dropdown">
+                    <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonOST'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                      select music
+                    </button>
+                    <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonOST'+scene.keyName">
+                      <li v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
+                        <button type='button' class='dropdown-item'  @click='selectOST(scene.keyName, ost)'>{{ ost }}</button>
+                      </li>
+                    </ul>
                   </div>
-                  <div class='card-footer'>
-                    {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].pos }}
-                  </div>
+                  <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
                 </div>
               </div>
             </div>
-            <div class='card col-sm-4'>
-              <!-- speaker section -->
-              <div class='card-header'> {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName].speaker.name }}</div>
 
-              <!-- text section -->
-              <textarea class='card-body' name="text" maxlength='350' placeholder="storytelling..." v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].text'></textarea>
-            </div>
+            <div class='card-footer text-muted'>written by: <input v-model='scriptObj["scene__" + scene.keyName].author' />, lines: {{ getLines(scene).length }}</div>
 
+            <!-- button to add line (indexed unique name) -->
+            <button class="btn btn-link" @click='onAddScene(scene.keyName, scene.next)'>Add Scene</button>
           </div>
-          <div class='row'>
-            <!-- add new char to display -->
-            <div class='col' v-if="getSprites(line).length >= 3">3 sprites only !</div>
-            <div class='col dropdown' v-else>
-              <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonDisplayAdd'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-                add sprite
-              </button>
-              <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonDisplayAdd'+scene.keyName+line.keyName">
-                <li v-for='(gSprite, index9) in getAllSprites()' :key='index9'>
-                  <div v-if='!isSpriteAddedToLine(gSprite.keyName, line)'>
-                    <button type='button' class='dropdown-item' @click='addSpriteToDisplay(scene.keyName, line.keyName, gSprite.keyName)'>{{ gSprite.name }}</button>
-                  </div>
-                </li>
-              </ul>
-            </div>
-
-            <!-- comp to add new global character -->
-            <AddGlobalStuff class='col' v-bind:stuffType='"character"' @add-exp='onAddSprite' />
-
-            <!-- change speaker -->
-            <div class="dropdown col">
-              <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonSpeaker'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-                select speaker
-              </button>
-              <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonSpeaker'+scene.keyName+line.keyName">
-                <li v-for='(speaking, index8) in getAllSprites()' :key='index8'>
-                  <button type='button' class='dropdown-item' @click='selectSpeaker(scene.keyName, line.keyName, speaking)'>{{ speaking.name }}</button>
-                </li>
-              </ul>
-            </div>
-          </div>
-
         </div>
-
-        <!-- button to add line (indexed unique name) -->
-        <button class="btn btn-primary" @click='onAddLine(scene.keyName, line.keyName, line.next)'>Add Line</button>
-      </div>
     </div>
-    <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapseBGOST' + scene.keyName" aria-expanded="false" :aria-controls="'collapseBGOST' + scene.keyName">
-        toggle background and music
-    </button>
-    <div class='collapse container-lg' :id='"collapseBGOST" + scene.keyName'>
-      <div class='row'>
-        <!-- bg section -->
-        <div class='col'>
-          background: {{ scriptObj["scene__" + scene.keyName].background }}
-          <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonBG'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-              select background
-            </button>
-            <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonBG'+scene.keyName">
-              <li v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
-                <button type='button' class='dropdown-item'  @click='selectBG(scene.keyName, bg)'>{{ bg }}</button>
-              </li>
-            </ul>
-          </div>
-          <AddGlobalStuff @add-exp='onAddBG' v-bind:stuffType='"background"'/>
-        </div>
 
-        <!-- ost section  -->
-        <div class='col'>
-          music: {{ scriptObj["scene__" + scene.keyName].ost }}
-          <div class="dropdown">
-            <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonOST'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-              select music
-            </button>
-            <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonOST'+scene.keyName">
-              <li v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
-                <button type='button' class='dropdown-item'  @click='selectOST(scene.keyName, ost)'>{{ ost }}</button>
-              </li>
-            </ul>
-          </div>
-          <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
-        </div>
-      </div>
-    </div>
-    <div class='card-footer text-muted'>author: <input v-model='scriptObj["scene__" + scene.keyName].author' />, lines: {{ getLines(scene).length }}</div>
-    <!-- button to add line (indexed unique name) -->
-    <button class="btn btn-link" @click='onAddScene(scene.keyName, scene.next)'>Add Scene</button>
   </div>
 
   <!-- component to download json -->
