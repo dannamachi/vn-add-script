@@ -121,20 +121,30 @@
     <div class='collapse' :id='"collapseBGOST" + scene.keyName'>
     <!-- bg section -->
     background: {{ scriptObj["scene__" + scene.keyName].background }}
-    select background
-    <div v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
-        <button @click='selectBG(scene.keyName, bg)'>{{ bg }}</button>
-      </div>
-    add custom background
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonBG'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+        select background
+      </button>
+      <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonBG'+scene.keyName">
+        <li v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
+          <button type='button' class='dropdown-item'  @click='selectBG(scene.keyName, bg)'>{{ bg }}</button>
+        </li>
+      </ul>
+    </div>
     <AddGlobalStuff @add-exp='onAddBG' v-bind:stuffType='"background"'/>
 
     <!-- ost section  -->
     music: {{ scriptObj["scene__" + scene.keyName].ost }}
-    select music
-    <div v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
-        <button @click='selectOST(scene.keyName, ost)'>{{ ost }}</button>
+    <div class="dropdown">
+      <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonOST'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+        select music
+      </button>
+      <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonOST'+scene.keyName">
+        <li v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
+          <button type='button' class='dropdown-item'  @click='selectOST(scene.keyName, ost)'>{{ ost }}</button>
+        </li>
+      </ul>
     </div>
-    add custom music
     <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
     </div>
     <div class='card-footer text-muted'>author: <input v-model='scriptObj["scene__" + scene.keyName].author' />, lines: {{ getLines(scene).length }}</div>
