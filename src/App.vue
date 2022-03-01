@@ -57,7 +57,7 @@
     </div>
   </div>
   <div class='card' id='loadScript'>
-    <div class='card-header'>new script</div>
+    <div class='card-header'>load script</div>
     <div class='card-body'>
       <div v-if='errMsg != ""' class="alert alert-danger" role="alert">
         {{ errMsg }}
