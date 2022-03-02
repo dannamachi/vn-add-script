@@ -49,7 +49,7 @@
     </li>
   </ul>
   <div class="tab-content" id="myTabContent">
-    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+    <div class="tab-pane show active" id="home" role="tabpanel" aria-labelledby="home-tab">
       <p>name: 
         <input v-model='scriptObj.meta__name' />
       </p>
@@ -58,14 +58,14 @@
       </p>
       <p>{{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)</p>
     </div>
-    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+    <div class="tab-pane" id="profile" role="tabpanel" aria-labelledby="profile-tab">
       <div v-if='errMsg != ""' class="alert alert-danger" role="alert">
         {{ errMsg }}
       </div>
       <textarea name="text" placeholder="paste script text here..." v-model='inputJSON'></textarea>
       <p><button class='btn btn-info' type='button' @click='loadScript()'>load section</button></p>
     </div>
-    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+    <div class="tab-pane" id="contact" role="tabpanel" aria-labelledby="contact-tab">
       <div class="dropdown col">
         <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonEChara' data-bs-toggle="dropdown" aria-expanded="false">
           select character to edit
