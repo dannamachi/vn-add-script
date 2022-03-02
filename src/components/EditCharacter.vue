@@ -23,6 +23,14 @@
                     </div>
                 </div>
                 <div v-else>
+                    <p>Enter to change name from '{{ this.context.oldName }}':</p>
+                    <input type="text" v-model="nameValue" maxlength="40" @keypress.enter.prevent="onAddSprite(null)"/>
+                    <div v-if='context.success=="yes"' class="alert alert-success" role="alert">
+                        character name updated !
+                    </div>
+                    <div v-else-if='context.success=="no"' class="alert alert-danger" role="alert">
+                        cannot update character ! try another name ^^
+                    </div>
                 </div>
             </div>
             <div class="modal-footer">
@@ -42,23 +50,37 @@ export default {
     components: {
         AddGlobalStuff
     },
+    data() {
+        return {
+            nameValue: ""
+        }
+    },
     methods: {
         closeModal() {
             this.$emit('closeModal')
         },
         onAddSprite(stuff) {
-            if (this.context.second == 'sprite') {
-                stuff.addToDisplay = {
-                    scene: this.context.scene,
-                    line: this.context.line
+            if (this.context.isEditing) {
+                if (this.context.oldName == this.nameValue) return;
+                this.$emit('editChara', {
+                    oldName: this.context.oldName,
+                    newName: this.nameValue
+                })
+            } else {
+                if (this.context.second == 'sprite') {
+                    stuff.addToDisplay = {
+                        scene: this.context.scene,
+                        line: this.context.line
+                    }
+                } else if (this.context.second == 'speaker') {
+                    stuff.selectSpeaker = {
+                        scene: this.context.scene,
+                        line: this.context.line
+                    }
                 }
-            } else if (this.context.second == 'speaker') {
-                stuff.selectSpeaker = {
-                    scene: this.context.scene,
-                    line: this.context.line
-                }
+                this.$emit('addExp', stuff)
             }
-            this.$emit('addExp', stuff)
+            
         }
     }
 }

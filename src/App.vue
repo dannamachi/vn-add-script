@@ -32,38 +32,67 @@
           <li class='nav-item'>
               <HelloWorld v-bind:jsonArr='scriptObj' />
           </li>
-          <!-- load script -->
-          <li class="nav-item">
-            <a class='nav-link' href='#loadScript'>load section</a>
-          </li>
         </ul>
       </div>
     </div>
   </nav>
 
-  <!-- script info -->
-  <div class='card' id='scriptInfo'>
-    <div class='card-header'>section info</div>
-    <div class='card-body'>
+  <ul class="nav nav-tabs" id="myTab" role="tablist">
+    <li class="nav-item" role="presentation">
+      <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">section info</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">load section</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">edit characters</button>
+    </li>
+  </ul>
+  <div class="tab-content" id="myTabContent">
+    <div class="tab-pane fade show active" id="home" role="tabpanel" aria-labelledby="home-tab">
       <p>name: 
         <input v-model='scriptObj.meta__name' />
       </p>
       <p>author: 
         <input v-model='scriptObj.meta__author' />
       </p>
-    <div class='card-footer'>
-      {{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)
+      <p>{{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)</p>
     </div>
-    </div>
-  </div>
-  <div class='card' id='loadScript'>
-    <div class='card-header'>load section</div>
-    <div class='card-body'>
+    <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab">
       <div v-if='errMsg != ""' class="alert alert-danger" role="alert">
         {{ errMsg }}
       </div>
       <textarea name="text" placeholder="paste script text here..." v-model='inputJSON'></textarea>
       <p><button class='btn btn-info' type='button' @click='loadScript()'>load section</button></p>
+    </div>
+    <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab">
+      <div class="dropdown col">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonEChara' data-bs-toggle="dropdown" aria-expanded="false">
+          select character to edit
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonEChara">
+          <li v-for='(speaking2, index21) in getAllSprites(true)' :key='index21'>
+            <button type='button' class='dropdown-item' data-bs-toggle="modal" data-bs-target="#exampleModal" @click='updateModalContext({
+              scene: "",
+              line: "",
+              isEditing: true,
+              second: "",
+              oldName: speaking2.name
+              })'>{{ speaking2.name }}</button>
+          </li>
+          <li><hr class="dropdown-divider"></li>
+          <li class='dropdown-item'>
+            <button @click='updateModalContext({
+              scene: "",
+              line: "",
+              isEditing: false,
+              second: ""
+              })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              add new character
+            </button>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
 
@@ -169,7 +198,12 @@
                         </div>
                         <li><hr class="dropdown-divider"></li>
                         <li class='dropdown-item'>
-                          <button @click='updateModalContext(scene.keyName, line.keyName, false, "sprite")' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                          <button @click='updateModalContext({
+                            scene: scene.keyName,
+                            line: line.keyName,
+                            isEditing: false,
+                            second: "sprite"
+                            })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                             add new character
                           </button>
                         </li>
@@ -194,7 +228,12 @@
                         </li>
                         <li><hr class="dropdown-divider"></li>
                         <li class='dropdown-item'>
-                          <button @click='updateModalContext(scene.keyName, line.keyName, false, "speaker")' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                          <button @click='updateModalContext({
+                            scene: scene.keyName,
+                            line: line.keyName,
+                            isEditing: false,
+                            second: "speaker"
+                            })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                             add new character
                           </button>
                         </li>
@@ -258,7 +297,7 @@
   </div>
 
   <!-- modal to edit character -->
-  <EditCharacter v-bind:context='modalContext' @add-exp='onAddSprite' @close-modal='onCloseModal'/>
+  <EditCharacter v-bind:context='modalContext' @add-exp='onAddSprite' @close-modal='onCloseModal' @edit-chara='onEditChara'/>
 
 </template>
 
@@ -322,15 +361,63 @@ export default {
     this.addNewScene()
   },
   methods: {
+    onEditChara(stuff) {
+      // check no duplicate
+      if (stuff.newName == '__narrator') {
+        this.modalContext.success = 'no'
+        return;
+      }
+      for (const [key, value] of Object.entries(this.scriptObj)) {
+        if (key.startsWith('char__')) {
+          if (value.keyName == stuff.newName) {
+            this.modalContext.success = 'no'
+            return;
+          }
+        }
+      }
+
+      // clone char data
+      var newChar = clone(this.scriptObj['char__' + stuff.oldName])
+      newChar.keyName = stuff.newName,
+      newChar.name = stuff.newName
+      this.scriptObj['char__' + stuff.newName] = newChar
+      // delete old
+      delete this.scriptObj['char__' + stuff.oldName]
+
+      // update all existing data with new char name
+      for (const [key,value] of Object.entries(this.scriptObj)) {
+        if (key.startsWith('scene__')) {
+          for (const [key1, value1] of Object.entries(value)) {
+            if (key1.startsWith('line__')) {
+              for (const [key2, value2] of Object.entries(value1)) {
+                if (key2 == 'sprite__' + stuff.oldName) {
+                  // add new
+                  var newObj = clone(value2)
+                  newObj.keyName = stuff.newName
+                  newObj.name = stuff.newName
+                  this.scriptObj[key][key1]['sprite__' + stuff.newName] = newObj
+                  // delete old
+                  delete this.scriptObj[key][key1][key2]
+                } 
+                else if (key2 == 'speaker' && value2.keyName == stuff.oldName) {
+                  this.scriptObj[key][key1].speaker = this.scriptObj['char__' + stuff.newName]
+                }
+              }
+            }
+          }
+        }
+      }
+      this.modalContext.success = 'yes'
+    },
     onCloseModal() {
       this.modalContext.isOpen = false
       this.modalContext.success = ''
     },
-    updateModalContext(scenename, linename, edit, second) {
-      this.modalContext.scene = scenename
-      this.modalContext.line = linename
-      this.modalContext.isEditing = edit
-      this.modalContext.second = second
+    updateModalContext(newUpdate) {
+      for (const [key, value] of Object.entries(newUpdate)) {
+        this.modalContext[key] = value
+      }
+
       this.modalContext.isOpen = true
       this.modalContext.success = ''
     },
@@ -363,7 +450,6 @@ export default {
             value1
             if (!script[key1]) delete this.scriptObj[key1]
           }
-          console.log(this.scriptObj)
           for (const [key, value] of Object.entries(script)) {
             this.scriptObj[key] = value
           }
@@ -490,11 +576,12 @@ export default {
         }
       }
     },
-    getAllSprites() {
+    getAllSprites(noNar=false) {
       var sList = []
       for (const [key, value] of Object.entries(this.scriptObj)) {
         if (key.startsWith('char__')) {
-          sList.push(value)
+          if (!noNar) sList.push(value)
+          else if (key != 'char____narrator') sList.push(value)
         }
       }
       return sList;
