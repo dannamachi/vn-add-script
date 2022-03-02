@@ -5,31 +5,33 @@
             <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">
-                    <div v-if='!context.isEditing'>New Character</div>
-                    <div v-else>Edit Character</div>
+                    <div v-if='!context.isEditing'>New {{ context.type }}</div>
+                    <div v-else>Edit {{ context.type }}</div>
                 </h5>
                 <button type="button" @click='closeModal()' class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div v-if='!context.isEditing'>
-                    <p>Enter to add new character:</p>
-                    <!-- comp to add new global character -->
-                    <AddGlobalStuff class='col' v-bind:stuffType='"character"' @add-exp='onAddSprite' />
+                    <p>Enter to add new {{ context.type }}:</p>
+
+                    <!-- comp to add new global stuff-->
+                    <AddGlobalStuff v-bind:stuffType='context.type' @add-exp='onAddSprite' />
+
                     <div v-if='context.success=="yes"' class="alert alert-success" role="alert">
-                        new character added !
+                        new {{ context.type }} added !
                     </div>
                     <div v-else-if='context.success=="no"' class="alert alert-danger" role="alert">
-                        cannot add that character ! try another name ^^
+                        cannot add that {{ context.type }} ! try another value ^^
                     </div>
                 </div>
                 <div v-else>
-                    <p>Enter to change name from '{{ this.context.oldName }}':</p>
+                    <p>Enter to change from '{{ this.context.oldName }}':</p>
                     <input type="text" v-model="nameValue" maxlength="40" @keypress.enter.prevent="onAddSprite(null)"/>
                     <div v-if='context.success=="yes"' class="alert alert-success" role="alert">
-                        character name updated !
+                        {{ context.type}} updated !
                     </div>
                     <div v-else-if='context.success=="no"' class="alert alert-danger" role="alert">
-                        cannot update character ! try another name ^^
+                        cannot update {{ context.type }} ! try another value ^^
                     </div>
                 </div>
             </div>
@@ -76,6 +78,19 @@ export default {
                     stuff.selectSpeaker = {
                         scene: this.context.scene,
                         line: this.context.line
+                    }
+                } else if (this.context.second == 'expression') {
+                    stuff.char = this.context.sprite
+                    stuff.selectExpression = {
+                        scene: this.context.scene,
+                        line: this.context.line,
+                        sprite: this.context.sprite
+                    }
+                } else if (this.context.second == 'position') {
+                    stuff.selectPosition = {
+                        scene: this.context.scene,
+                        line: this.context.line,
+                        sprite: this.context.sprite
                     }
                 }
                 this.$emit('addExp', stuff)
