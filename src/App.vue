@@ -160,16 +160,31 @@
                         add sprite
                       </button>
                       <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonDisplayAdd'+scene.keyName+line.keyName">
-                        <li v-for='(gSprite, index9) in getAllSprites()' :key='index9'>
-                          <div v-if='!isSpriteAddedToLine(gSprite.keyName, line)'>
-                            <button type='button' class='dropdown-item' @click='addSpriteToDisplay(scene.keyName, line.keyName, gSprite.keyName)'>{{ gSprite.name }}</button>
-                          </div>
+                        <div v-if="getSprites(line).length < 3">
+                          <li v-for='(gSprite, index9) in getAllSprites()' :key='index9'>
+                            <div v-if='!isSpriteAddedToLine(gSprite.keyName, line)'>
+                              <button type='button' class='dropdown-item' @click='addSpriteToDisplay(scene.keyName, line.keyName, gSprite.keyName)'>{{ gSprite.name }}</button>
+                            </div>
+                          </li>
+                        </div>
+                        <div v-else>
+                          <li class='dropdown-item'>3 sprites only !</li>
+                        </div>
+                        <li><hr class="dropdown-divider"></li>
+                        <li class='dropdown-item'>
+                          <button @click='updateModalContext(scene.keyName, line.keyName, false, "sprite")' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            add new character
+                          </button>
                         </li>
                       </ul>
                     </div>
 
                     <!-- comp to add new global character -->
-                    <AddGlobalStuff class='col' v-bind:stuffType='"character"' @add-exp='onAddSprite' />
+                    <!-- <AddGlobalStuff class='col' v-bind:stuffType='"character"' @add-exp='onAddSprite' /> -->
+                    <div class='col'>
+                      <!-- button to add line (indexed unique name) -->
+                      <button class="btn btn-primary" @click='onAddLine(scene.keyName, line.keyName, line.next)'>add line</button>
+                    </div>
 
                     <!-- change speaker -->
                     <div class="dropdown col">
@@ -180,14 +195,17 @@
                         <li v-for='(speaking, index8) in getAllSprites()' :key='index8'>
                           <button type='button' class='dropdown-item' @click='selectSpeaker(scene.keyName, line.keyName, speaking)'>{{ speaking.name }}</button>
                         </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li class='dropdown-item'>
+                          <button @click='updateModalContext(scene.keyName, line.keyName, false, "speaker")' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            add new character
+                          </button>
+                        </li>
                       </ul>
                     </div>
                   </div>
 
                 </div>
-
-                <!-- button to add line (indexed unique name) -->
-                <button class="btn btn-primary" @click='onAddLine(scene.keyName, line.keyName, line.next)'>add line</button>
               </div>
             </div>
 
@@ -242,11 +260,15 @@
 
   </div>
 
+  <!-- modal to edit character -->
+  <EditCharacter v-bind:context='modalContext' @add-exp='onAddSprite' @close-modal='onCloseModal'/>
+
 </template>
 
 <script>
 import HelloWorld from './components/HelloWorld.vue'
 import AddGlobalStuff from './components/AddGlobalStuff.vue'
+import EditCharacter from './components/EditCharacter.vue'
 import { v4 as uuidv4 } from 'uuid';
 import clone from 'just-clone';
 import { reactive } from "vue";
@@ -256,7 +278,8 @@ export default {
   name: 'App',
   components: {
     HelloWorld,
-    AddGlobalStuff
+    AddGlobalStuff,
+    EditCharacter
   },
   setup() {
     const scriptObj = reactive({
@@ -284,7 +307,12 @@ export default {
     return {
       inputJSON: "",
       errMsg: "",
-      startNum: 0
+      startNum: 0,
+      modalContext: {
+        isEditing: false,
+        isOpen: false,
+        success: ''
+      }
     }
   },
   watch: {
@@ -297,6 +325,18 @@ export default {
     this.addNewScene()
   },
   methods: {
+    onCloseModal() {
+      this.modalContext.isOpen = false
+      this.modalContext.success = ''
+    },
+    updateModalContext(scenename, linename, edit, second) {
+      this.modalContext.scene = scenename
+      this.modalContext.line = linename
+      this.modalContext.isEditing = edit
+      this.modalContext.second = second
+      this.modalContext.isOpen = true
+      this.modalContext.success = ''
+    },
     checkScript(script) {
       var sceneCount = 0;
       var charCount = 0;
@@ -393,11 +433,13 @@ export default {
     },
     onAddSprite(spObj) {
       if (spObj.sprite == '__narrator') {
+        this.modalContext.success = 'no'
         return;
       }
       for (const [key, value] of Object.entries(this.scriptObj)) {
         if (key.startsWith('char__')) {
           if (value.keyName == spObj.sprite) {
+            this.modalContext.success = 'no'
             return;
           }
         }
@@ -408,6 +450,14 @@ export default {
         expList: ['neutral']
       }
       this.scriptObj.meta__ccount += 1
+
+      // add to sprite
+      if (spObj.addToDisplay) {
+        this.addSpriteToDisplay(spObj.addToDisplay.scene, spObj.addToDisplay.line, spObj.sprite)
+      } else if (spObj.selectSpeaker) {
+        this.selectSpeaker(spObj.selectSpeaker.scene, spObj.selectSpeaker.line, this.scriptObj['char__' + spObj.sprite])
+      }
+      this.modalContext.success = 'yes'
     },
     onAddBG(bgObj) {
       for (var bg of this.scriptObj.meta__bgList) {
