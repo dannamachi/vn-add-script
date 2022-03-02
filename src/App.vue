@@ -34,7 +34,7 @@
           </li>
           <!-- load script -->
           <li class="nav-item">
-            <a class='nav-link' href='#loadScript'>load script</a>
+            <a class='nav-link' href='#loadScript'>load section</a>
           </li>
         </ul>
       </div>
@@ -43,7 +43,7 @@
 
   <!-- script info -->
   <div class='card' id='scriptInfo'>
-    <div class='card-header'>script info</div>
+    <div class='card-header'>section info</div>
     <div class='card-body'>
       <p>name: 
         <input v-model='scriptObj.meta__name' />
@@ -57,13 +57,13 @@
     </div>
   </div>
   <div class='card' id='loadScript'>
-    <div class='card-header'>load script</div>
+    <div class='card-header'>load section</div>
     <div class='card-body'>
       <div v-if='errMsg != ""' class="alert alert-danger" role="alert">
         {{ errMsg }}
       </div>
       <textarea name="text" placeholder="paste script text here..." v-model='inputJSON'></textarea>
-      <p><button class='btn btn-info' type='button' @click='loadScript()'>load script</button></p>
+      <p><button class='btn btn-info' type='button' @click='loadScript()'>load section</button></p>
     </div>
   </div>
 
@@ -260,7 +260,7 @@ export default {
   },
   setup() {
     const scriptObj = reactive({
-      'meta__name'    : "New script",
+      'meta__name'    : "New section",
       'meta__author'  : 'Cool Author',
       'meta__updated' : new Date().toString(),
       'meta__scount'  : 0,

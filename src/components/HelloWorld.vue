@@ -1,7 +1,7 @@
 <template>
     <!-- show some content stats here -->
     <!-- button -->
-    <button type='button' class='btn btn-success' @click='downloadJson()'>download script</button>
+    <button type='button' class='btn btn-success' @click='downloadJson()'>download section</button>
 </template>
 
 <script>
