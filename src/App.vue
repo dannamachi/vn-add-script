@@ -25,11 +25,11 @@
             </ul>
           </li>
           <!-- add scene -->
-          <li class='nav-item'>
+          <li class='nav-item mx-1'>
             <button class="btn btn-primary" @click='addNewScene()'>add scene</button>
           </li>
           <!-- download -->
-          <li class='nav-item'>
+          <li class='nav-item mx-1'>
               <HelloWorld v-bind:jsonArr='scriptObj' />
           </li>
         </ul>
@@ -50,23 +50,27 @@
   </ul>
   <div class="tab-content" id="myTabContent">
     <div class="tab-pane show active" id="home" role="tabpanel" aria-labelledby="home-tab">
+      <div class='pt-2 pb-2'>
       <p>name: 
         <input v-model='scriptObj.meta__name' />
       </p>
       <p>author: 
         <input v-model='scriptObj.meta__author' />
       </p>
-      <p>{{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)</p>
+      <div>{{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)</div>
+      </div>
     </div>
     <div class="tab-pane" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+      <div class='mt-2 mb-2'>
       <div v-if='errMsg != ""' class="alert alert-danger" role="alert">
         {{ errMsg }}
       </div>
       <textarea name="text" placeholder="paste script text here..." v-model='inputJSON'></textarea>
-      <p><button class='btn btn-info' type='button' @click='loadScript()'>load section</button></p>
+      <div><button class='btn btn-info' type='button' @click='loadScript()'>load section</button></div>
+      </div>
     </div>
     <div class="tab-pane" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-      <div class="dropdown col">
+      <div class="dropdown mt-2 mb-2">
         <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonEChara' data-bs-toggle="dropdown" aria-expanded="false">
           select character to edit
         </button>
@@ -160,7 +164,7 @@
                         <div 
                           v-for='(sprite, index4) in getSprites(line)' 
                           :key='index4' 
-                          class='col-auto card'>
+                          class='col-auto card mx-2 mb-2 pb-1'>
                           <div>
                             <a class='btn-link' @click='removeSpriteFromDisplay(scene.keyName, line.keyName, sprite.keyName)'>[x]</a>
                             showing: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName]["sprite__" + sprite.keyName].name }}
@@ -219,7 +223,7 @@
                         </div>
                       </div>
                     </div>
-                    <div class='card border-primary col-sm-4 pt-2'>
+                    <div class='card border-primary col-sm-4 pb-2 pt-2'>
                       <!-- speaker section -->
                       <div class='card-title'>
                           <div class="dropdown">
