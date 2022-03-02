@@ -1,7 +1,7 @@
 # VN Script Builder
 
 ## Description
-No longer will the writing for a VN-like dialogue system has to be done within the game code. No more will we be tortured by manual formatting from Google Docs or text files. Unless you are using Renpy, this will help you cleanly separate coding and dialogue writing for a VN-like game.
+No longer will the writing for a VN-like dialogue system have to be done within the game code. No more will we be tortured by manual formatting from Google Docs or text files. Unless you are using Renpy, this will help you cleanly separate coding and dialogue writing for a VN-like game.
 
 ## Live version
 https://mochimochi95.itch.io/script-writer
