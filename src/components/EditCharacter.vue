@@ -5,8 +5,8 @@
             <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">
-                    <div v-if='!context.isEditing'>New {{ context.type }} {{ context.type =="flag" && context.setterFlag ? "that is being set" : "that is needed" }}</div>
-                    <div v-else>Edit {{ context.type }} {{ context.type =="flag" && context.setterFlag ? "that is being set" : "that is needed" }}</div>
+                    <div v-if='!context.isEditing'>New {{ context.type }} <span v-if='context.type =="flag"'> {{ context.setterFlag ? "that is being set" : "that is needed" }}</span></div>
+                    <div v-else>Edit {{ context.type }} <span v-if='context.type =="flag"'>{{ context.setterFlag ? "that is being set" : "that is needed" }}</span></div>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>

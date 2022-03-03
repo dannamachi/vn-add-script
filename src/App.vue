@@ -305,35 +305,49 @@
           <div class='collapse container-lg' :id='"collapseBGOST" + scene.keyName'>
             <div class='row'>
               <!-- bg section -->
-              <div class='col'>
-                background: {{ scriptObj["scene__" + scene.keyName].background }}
-                <div class="dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonBG'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-                    select background
-                  </button>
-                  <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonBG'+scene.keyName">
-                    <li v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
-                      <button type='button' class='dropdown-item'  @click='selectBG(scene.keyName, bg)'>{{ bg }}</button>
-                    </li>
-                  </ul>
-                </div>
-                <AddGlobalStuff @add-exp='onAddBG' v-bind:stuffType='"background"'/>
+              <div class="col dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonBG'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                  background: {{ scriptObj["scene__" + scene.keyName].background }}
+                </button>                    
+                <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonBG'+scene.keyName">
+                  <li v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
+                    <button type='button' class='dropdown-item'  @click='selectBG(scene.keyName, bg)'>{{ bg }}</button>
+                  </li>
+                  <li class='dropdown-item'>
+                    <button @click='updateModalContext({
+                      scene: scene.keyName,
+                      line: "",
+                      isEditing: false,
+                      second: "",
+                      type: "background"
+                      })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                      add new background
+                    </button>
+                  </li>
+                </ul>
               </div>
 
               <!-- ost section  -->
-              <div class='col'>
-                music: {{ scriptObj["scene__" + scene.keyName].ost }}
-                <div class="dropdown">
-                  <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonOST'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-                    select music
-                  </button>
-                  <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonOST'+scene.keyName">
-                    <li v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
-                      <button type='button' class='dropdown-item'  @click='selectOST(scene.keyName, ost)'>{{ ost }}</button>
-                    </li>
-                  </ul>
-                </div>
-                <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
+              <div class="col dropdown">
+                <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonOST'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                  music: {{ scriptObj["scene__" + scene.keyName].ost }}
+                </button>                
+                <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonOST'+scene.keyName">
+                  <li v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
+                    <button type='button' class='dropdown-item'  @click='selectOST(scene.keyName, ost)'>{{ ost }}</button>
+                  </li>
+                  <li class='dropdown-item'>
+                    <button @click='updateModalContext({
+                      scene: scene.keyName,
+                      line: "",
+                      isEditing: false,
+                      second: "",
+                      type: "music"
+                      })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                      add new music
+                    </button>
+                  </li>
+                </ul>
               </div>
 
               <!-- flag section -->
@@ -389,7 +403,6 @@
 
 <script>
 import HelloWorld from './components/HelloWorld.vue'
-import AddGlobalStuff from './components/AddGlobalStuff.vue'
 import EditCharacter from './components/EditCharacter.vue'
 import { v4 as uuidv4 } from 'uuid';
 import clone from 'just-clone';
@@ -400,7 +413,6 @@ export default {
   name: 'App',
   components: {
     HelloWorld,
-    AddGlobalStuff,
     EditCharacter
   },
   setup() {
@@ -536,7 +548,9 @@ export default {
     },
     onModalProcess(stuff) {
       // console.log(stuff)
-      if (this.modalContext.type == 'character' && !this.modalContext.isEditing) {
+      if (this.modalContext.type == 'background') this.onAddBG(stuff)
+      else if (this.modalContext.type == 'music') this.onAddOST(stuff)
+      else if (this.modalContext.type == 'character' && !this.modalContext.isEditing) {
         this.onAddSprite(stuff)
       } else if (this.modalContext.type == 'expression' && !this.modalContext.isEditing) {
         this.onAddExpression(stuff)
@@ -739,18 +753,22 @@ export default {
     onAddBG(bgObj) {
       for (var bg of this.scriptObj.meta__bgList) {
         if (bg == bgObj.bg) {
+          this.modalContext.success = 'no'
           return;
         }
       }
       this.scriptObj.meta__bgList.push(bgObj.bg);
+      this.modalContext.success = 'yes'
     },
     onAddOST(ostObj) {
       for (var ost of this.scriptObj.meta__ostList) {
         if (ost == ostObj.ost) {
+          this.modalContext.success = 'no'
           return;
         }
       }
       this.scriptObj.meta__ostList.push(ostObj.ost);
+      this.modalContext.success = 'yes'
     },
     onAddPosition(posObj) {
       for (var pos of this.scriptObj.meta__posList) {
