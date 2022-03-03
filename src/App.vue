@@ -106,8 +106,9 @@
             select flag to edit
           </button>
           <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlag'>
-            <li v-for='(flag, index22) in scriptObj.meta__flagList' :key='index22'>
-              <button type='button' class='dropdown-item' @click='updateModalContext({
+            <li class='dropdown-item' v-for='(flag, index22) in scriptObj.meta__flagList' :key='index22'>
+              <button type='button' class='btn btn-link' @click='removeFlag(flag)'>[x]</button>
+              <button class='btn btn-link' @click='updateModalContext({
                 scene: "",
                 line: "",
                 isEditing: true,
@@ -349,7 +350,7 @@
   </div>
 
   <!-- modal to edit character -->
-  <EditCharacter v-bind:context='modalContext' @add-exp='onModalProcess' @edit-chara='onEditChara'/>
+  <EditCharacter v-bind:context='modalContext' @add-exp='onModalProcess' @edit-chara='onEditChara' @remove-flag="onRemoveFlag"/>
 
 </template>
 
@@ -416,6 +417,16 @@ export default {
     this.addNewScene()
   },
   methods: {
+    removeFlag(stuff) {
+      var found = -1;
+      for (var i=0; i<this.scriptObj.meta__flagList.length; i++) {
+        if (this.scriptObj.meta__flagList[i].name == stuff.name) {
+          found = i
+          break
+        }
+      }
+      this.scriptObj.meta__flagList.splice(found,1)
+    },
     onAddFlag(stuff) {
       for (var pos of this.scriptObj.meta__flagList) {
         if (pos.name == stuff.name) {
@@ -701,7 +712,7 @@ export default {
     },
 
     getFlagDisplay(flag, setter=false) {
-      if (flag.type == 'flag') return (setter ? 'need ' : 'give ') + flag.name 
+      if (flag.type == 'flag') return (setter ? 'give ' : 'need ') + flag.name 
       if (flag.type == 'score') return flag.name + ' = ' + flag.score
       if (flag.type == 'value') return flag.name + ' : ' + flag.value
       if (flag.type == 'more') return flag.name + ' > ' + flag.score
