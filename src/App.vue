@@ -100,10 +100,10 @@
               </button>
             </li>
           </ul>
-          </div>
+        </div>
         <div class='dropdown mt-1 mb-1'>
           <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonFlag' data-bs-toggle="dropdown" aria-expanded="false">
-            select flag to edit
+            flags required by section
           </button>
           <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlag'>
             <li class='dropdown-item' v-for='(flag, index22) in scriptObj.meta__flagList' :key='index22'>
@@ -298,7 +298,7 @@
           </div>
 
           <p>~~o0o~~</p>
-          <!-- bg and ost section -->
+          <!-- other scene info section -->
           <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapseBGOST' + scene.keyName" aria-expanded="false" :aria-controls="'collapseBGOST' + scene.keyName">
             toggle background and music
           </button>
@@ -335,6 +335,39 @@
                 </div>
                 <AddGlobalStuff @add-exp='onAddOST' v-bind:stuffType='"music"'/>
               </div>
+
+              <!-- flag section -->
+              <div class='col dropdown'>
+                <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonFlagSet' data-bs-toggle="dropdown" aria-expanded="false">
+                  flags given by scene
+                </button>
+                <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlagSet'>
+                  <li class='dropdown-item' v-for='(flag2, index23) in scene.meta__flagList' :key='index23'>
+                    <button type='button' class='btn btn-link' @click='removeFlagFromScene(scene.keyName, flag2)'>[x]</button>
+                    <button class='btn btn-link' @click='updateModalContext({
+                      scene: scene.keyName,
+                      line: "",
+                      isEditing: true,
+                      second: "",
+                      type: "flag",
+                      setterFlag: true,
+                      old: flag2
+                      })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag2, true) }}</button>
+                  </li>
+                  <li class='dropdown-item'>
+                    <button @click='updateModalContext({
+                      scene: scene.keyName,
+                      line: "",
+                      isEditing: false,
+                      type: "flag",
+                      second: "",
+                      setterFlag: true
+                      })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                      add new flag
+                    </button>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 
@@ -350,7 +383,7 @@
   </div>
 
   <!-- modal to edit character -->
-  <EditCharacter v-bind:context='modalContext' @add-exp='onModalProcess' @edit-chara='onEditChara' @remove-flag="onRemoveFlag"/>
+  <EditCharacter v-bind:context='modalContext' @add-exp='onModalProcess' @edit-chara='onEditChara' />
 
 </template>
 
@@ -427,6 +460,45 @@ export default {
       }
       this.scriptObj.meta__flagList.splice(found,1)
     },
+
+    onEditFlagFromScene(sstuff) {
+      var stuff = sstuff.item
+      var found = -1
+      for (var i=0; i < this.scriptObj['scene__' + sstuff.scene].meta__flagList.length; i++) {
+        if (this.scriptObj['scene__' + sstuff.scene].meta__flagList[i].name == stuff.name) {
+          if (this.scriptObj['scene__' + sstuff.scene].meta__flagList[i].name != stuff.oldName) {
+            this.modalContext.success = 'no'
+            return;
+          } 
+        }
+        if (this.scriptObj['scene__' + sstuff.scene].meta__flagList[i].name == stuff.oldName) {
+          found = i
+        }
+      }
+
+      if (found == -1) {
+        this.modalContext.success = 'no'
+        return;
+      }
+      this.scriptObj['scene__' + sstuff.scene].meta__flagList.splice(found, 1)
+      delete stuff['oldName']
+
+      this.scriptObj['scene__' + sstuff.scene].meta__flagList.push(stuff);
+      this.modalContext.success = 'yes'
+      this.modalContext.old = stuff
+    },
+    onAddFlagFromScene(sstuff) {
+      // NOTE: backward compatible meta
+      var stuff = sstuff.item
+      for (var pos of this.scriptObj['scene__' + sstuff.scene].meta__flagList) {
+        if (pos.name == stuff.name) {
+          this.modalContext.success = 'no'
+          return;
+        }
+      }
+      this.scriptObj['scene__' + sstuff.scene].meta__flagList.push(stuff);
+      this.modalContext.success = 'yes'
+    },
     onAddFlag(stuff) {
       for (var pos of this.scriptObj.meta__flagList) {
         if (pos.name == stuff.name) {
@@ -463,6 +535,7 @@ export default {
       this.modalContext.old = stuff
     },
     onModalProcess(stuff) {
+      // console.log(stuff)
       if (this.modalContext.type == 'character' && !this.modalContext.isEditing) {
         this.onAddSprite(stuff)
       } else if (this.modalContext.type == 'expression' && !this.modalContext.isEditing) {
@@ -470,8 +543,14 @@ export default {
       } else if (this.modalContext.type == 'position' && !this.modalContext.isEditing) {
         this.onAddPosition(stuff)
       } else if (this.modalContext.type == 'flag') {
-        if (this.modalContext.isEditing) this.onEditFlag(stuff)
-        else this.onAddFlag(stuff)
+        if (this.modalContext.isEditing) {
+          if (!this.modalContext.setterFlag) this.onEditFlag(stuff)
+          else this.onEditFlagFromScene(stuff)
+        }
+        else {
+          if (!this.modalContext.setterFlag) this.onAddFlag(stuff)
+          else this.onAddFlagFromScene(stuff)
+        }
       }
     },
     onEditChara(stuff) {
@@ -856,7 +935,8 @@ export default {
         next: nextName,
         previous: lastName,
         background: this.scriptObj.meta__bgList[0],
-        ost: this.scriptObj.meta__ostList[0]
+        ost: this.scriptObj.meta__ostList[0],
+        meta__flagList: []
       }
 
       // add to script obj

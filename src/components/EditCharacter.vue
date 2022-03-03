@@ -63,7 +63,13 @@ export default {
     },
     methods: {
         onEditFlag(stuff) {
-            this.$emit('addExp', stuff)
+            if (!this.context.setterFlag) this.$emit('addExp', stuff)
+            else {
+                this.$emit('addExp', {
+                    scene: this.context.scene,
+                    item: stuff
+                })
+            }
         },
         getEditContext() {
             var stuff = {
