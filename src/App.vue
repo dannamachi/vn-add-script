@@ -450,6 +450,7 @@ export default {
 
       this.scriptObj.meta__flagList.push(stuff);
       this.modalContext.success = 'yes'
+      this.modalContext.old = stuff
     },
     onModalProcess(stuff) {
       if (this.modalContext.type == 'character' && !this.modalContext.isEditing) {
@@ -510,6 +511,7 @@ export default {
         }
       }
       this.modalContext.success = 'yes'
+      this.modalContext.oldName = stuff.newName
     },
     onCloseModal() {
       this.modalContext.isOpen = false

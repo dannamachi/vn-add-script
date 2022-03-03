@@ -51,9 +51,9 @@ export default {
     props: ['context'],
     data() {
         return {
-            flagName: this.context.editing ? "" : "some flag",
+            flagName: "",
             flagScore: 0,
-            flagValue: this.context.editing ? "" : "some value"
+            flagValue: ""
         }
     },
     methods: {
@@ -62,15 +62,23 @@ export default {
                 name: this.flagName,
                 type: flagType
             }
-            if (this.context.editing) stuff.oldName = this.context.oldName
+            if (this.context.editing) {
+                if (this.context.oldName == this.flagName) return
+                stuff.oldName = this.context.oldName
+            }
             if (flagType == 'flag' && stuff.name != "") {
                 this.$emit("addExp", stuff)
+                this.flagName = ""
             } else if (flagType == 'score' && stuff.name != "" && !isNaN(this.flagScore)) {
                 stuff.score = this.flagScore
                 this.$emit("addExp", stuff)
+                this.flagName = ""
+                this.flagScore = 0
             } else if (flagType == 'value' && stuff.name != "" && this.flagValue != "") {
                 stuff.value = this.flagValue
                 this.$emit("addExp", stuff)
+                this.flagName = ""
+                this.flagValue = ""
             }
         }
     }
