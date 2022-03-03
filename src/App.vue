@@ -26,11 +26,11 @@
             </ul>
           </li>
           <!-- add scene -->
-          <li class='nav-item mx-1'>
+          <li class='nav-item mx-1 mt-2'>
             <button class="btn btn-primary" @click='addNewScene()'>add scene</button>
           </li>
           <!-- download -->
-          <li class='nav-item mx-1'>
+          <li class='nav-item mx-1 mt-2'>
               <HelloWorld v-bind:jsonArr='scriptObj' />
           </li>
         </ul>
@@ -53,13 +53,11 @@
   <div class="tab-content" id="myTabContent">
     <div class="tab-pane show active" id="home" role="tabpanel" aria-labelledby="home-tab">
       <div class='pt-2 pb-2'>
-      <p>name: 
-        <input v-model='scriptObj.meta__name' />
-      </p>
-      <p>author: 
-        <input v-model='scriptObj.meta__author' />
-      </p>
-      <div>{{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)</div>
+        name: 
+        <input class='mx-2' v-model='scriptObj.meta__name' /> 
+        author: 
+        <input class='mx-2' v-model='scriptObj.meta__author' />
+      <!-- <div>{{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)</div> -->
       </div>
     </div>
     <div class="tab-pane" id="profile" role="tabpanel" aria-labelledby="profile-tab">
@@ -67,71 +65,67 @@
       <div v-if='errMsg != ""' class="alert alert-danger" role="alert">
         {{ errMsg }}
       </div>
-      <textarea name="text" placeholder="paste script text here..." v-model='inputJSON'></textarea>
-      <div><button class='btn btn-info' type='button' @click='loadScript()'>load section</button></div>
+      <input name="text" placeholder="paste script text here..." v-model='inputJSON' />
+      <button class='mx-2 btn btn-dark' type='button' @click='loadScript()'>load section</button>
       </div>
     </div>
     <div class="tab-pane" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-      <div class="mt-1 mb-1">
-        <div class='dropdown mt-1 mb-1'>
-          <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonEChara' data-bs-toggle="dropdown" aria-expanded="false">
-            select character to edit
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonEChara">
-            <li v-for='(speaking2, index21) in getAllSprites(true)' :key='index21'>
-              <button type='button' class='dropdown-item' data-bs-toggle="modal" data-bs-target="#exampleModal" @click='updateModalContext({
-                scene: "",
-                line: "",
-                isEditing: true,
-                second: "",
-                type: "character",
-                oldName: speaking2.name
-                })'>{{ speaking2.name }}</button>
-            </li>
-            <li class='dropdown-item'>
-              <button @click='updateModalContext({
-                scene: "",
-                line: "",
-                isEditing: false,
-                type: "character",
-                second: ""
-                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                add new character
-              </button>
-            </li>
-          </ul>
-        </div>
-        <div class='dropdown mt-1 mb-1'>
-          <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonFlag' data-bs-toggle="dropdown" aria-expanded="false">
-            flags required by section
-          </button>
-          <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlag'>
-            <li class='dropdown-item' v-for='(flag, index22) in scriptObj.meta__flagList' :key='index22'>
-              <button type='button' class='btn btn-link' @click='removeFlag(flag)'>[x]</button>
-              <button class='btn btn-link' @click='updateModalContext({
-                scene: "",
-                line: "",
-                isEditing: true,
-                second: "",
-                type: "flag",
-                setterFlag: false,
-                old: flag
-                })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag) }}</button>
-            </li>
-            <li class='dropdown-item'>
-              <button @click='updateModalContext({
-                scene: "",
-                line: "",
-                isEditing: false,
-                type: "flag",
-                second: "",
-                setterFlag: false
-                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                add new flag
-              </button>
-            </li>
-          </ul>
-        </div>
+      <div class="mt-2 mb-2">
+        <button class="mx-2 btn btn-warning dropdown-toggle" type="button" id='dropdownMenuButtonEChara' data-bs-toggle="dropdown" aria-expanded="false">
+          select character to edit
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonEChara">
+          <li v-for='(speaking2, index21) in getAllSprites(true)' :key='index21'>
+            <button type='button' class='dropdown-item' data-bs-toggle="modal" data-bs-target="#exampleModal" @click='updateModalContext({
+              scene: "",
+              line: "",
+              isEditing: true,
+              second: "",
+              type: "character",
+              oldName: speaking2.name
+              })'>{{ speaking2.name }}</button>
+          </li>
+          <li class='dropdown-item'>
+            <button @click='updateModalContext({
+              scene: "",
+              line: "",
+              isEditing: false,
+              type: "character",
+              second: ""
+              })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              add new character
+            </button>
+          </li>
+        </ul>
+        <button class="mx-2 btn btn-info dropdown-toggle" type="button" id='dropdownMenuButtonFlag' data-bs-toggle="dropdown" aria-expanded="false">
+          flags required by section
+        </button>
+        <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlag'>
+          <li class='dropdown-item' v-for='(flag, index22) in scriptObj.meta__flagList' :key='index22'>
+            <button type='button' class='btn btn-link' @click='removeFlag(flag)'>[x]</button>
+            <button class='btn btn-link' @click='updateModalContext({
+              scene: "",
+              line: "",
+              isEditing: true,
+              second: "",
+              type: "flag",
+              setterFlag: false,
+              old: flag
+              })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag) }}</button>
+          </li>
+          <li class='dropdown-item'>
+            <button @click='updateModalContext({
+              scene: "",
+              line: "",
+              isEditing: false,
+              type: "flag",
+              second: "",
+              setterFlag: false
+              })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              add new flag
+            </button>
+          </li>
+        </ul>
       </div>
     </div>
   </div>
@@ -195,7 +189,7 @@
             </ul>
 
             <!-- flag section -->
-            <button class="mx-2 mt-2 btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonFlagSet' data-bs-toggle="dropdown" aria-expanded="false">
+            <button class="mx-2 mt-2 btn btn-info dropdown-toggle" type="button" id='dropdownMenuButtonFlagSet' data-bs-toggle="dropdown" aria-expanded="false">
               flags given by scene
             </button>
             <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlagSet'>
@@ -239,12 +233,12 @@
 
                 <div class='row lineBox'> -->
                   <!-- show current display sprites -->
-                  <div class='card border-primary col-sm-8 pt-2'>
+                  <div class='card bg-light col-sm-8 pt-2'>
                     <div class='card-title'>
                       <!-- add new char to display -->
                       <div v-if="getSprites(line).length >= 3">3 sprites only !</div>
                       <div class='dropdown' v-else>
-                        <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonDisplayAdd'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                        <button class="btn btn-warning dropdown-toggle" type="button" :id="'dropdownMenuButtonDisplayAdd'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
                           add sprite
                         </button>
                         <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonDisplayAdd'+scene.keyName+line.keyName">
@@ -335,11 +329,11 @@
                       </div>
                     </div>
                   </div>
-                  <div class='card border-primary col-sm-4 pb-2 pt-2'>
+                  <div class='card bg-light col-sm-4 pb-2 pt-2'>
                     <!-- speaker section -->
                     <div class='card-title'>
                         <div class="dropdown">
-                          <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonSpeaker'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                          <button class="btn btn-warning dropdown-toggle" type="button" :id="'dropdownMenuButtonSpeaker'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
                             speaking: {{ scriptObj["scene__" + scene.keyName]["line__" + line.keyName].speaker.name }}
                           </button>                    
                           <!-- button to add line (indexed unique name) -->
