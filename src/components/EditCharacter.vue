@@ -8,7 +8,7 @@
                     <div v-if='!context.isEditing'>New {{ context.type }} {{ context.type =="flag" && context.setterFlag ? "that is being set" : "that is needed" }}</div>
                     <div v-else>Edit {{ context.type }} {{ context.type =="flag" && context.setterFlag ? "that is being set" : "that is needed" }}</div>
                 </h5>
-                <button type="button" @click='closeModal()' class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div v-if='!context.isEditing'>
@@ -40,10 +40,6 @@
                         cannot update {{ context.type }} ! try another value ^^
                     </div>
                 </div>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                <!-- <button type="button" class="btn btn-primary">Save changes</button> -->
             </div>
             </div>
         </div>
@@ -81,9 +77,6 @@ export default {
                 if (this.context.old.type == 'value' || this.context.old.type == 'diff') stuff.oldValue = this.context.old.value
             }
             return stuff
-        },
-        closeModal() {
-            this.$emit('closeModal')
         },
         onAddSprite(stuff) {
             if (this.context.isEditing) {

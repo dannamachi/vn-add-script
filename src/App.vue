@@ -349,7 +349,7 @@
   </div>
 
   <!-- modal to edit character -->
-  <EditCharacter v-bind:context='modalContext' @add-exp='onModalProcess' @close-modal='onCloseModal' @edit-chara='onEditChara'/>
+  <EditCharacter v-bind:context='modalContext' @add-exp='onModalProcess' @edit-chara='onEditChara'/>
 
 </template>
 
@@ -511,10 +511,6 @@ export default {
       }
       this.modalContext.success = 'yes'
       this.modalContext.oldName = stuff.newName
-    },
-    onCloseModal() {
-      this.modalContext.isOpen = false
-      this.modalContext.success = ''
     },
 
     updateModalContext(newUpdate) {
