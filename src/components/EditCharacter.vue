@@ -77,8 +77,8 @@ export default {
             if (this.context.isEditing) {
                 stuff.type = this.context.old.type
                 stuff.oldName = this.context.old.name
-                if (this.context.old.type == 'score') stuff.oldScore = this.context.old.score
-                if (this.context.old.type == 'value') stuff.oldValue = this.context.old.value
+                if (this.context.old.type == 'score' || this.context.old.type == 'more' || this.context.old.type == 'less') stuff.oldScore = this.context.old.score
+                if (this.context.old.type == 'value' || this.context.old.type == 'diff') stuff.oldValue = this.context.old.value
             }
             return stuff
         },

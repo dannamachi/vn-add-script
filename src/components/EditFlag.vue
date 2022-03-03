@@ -69,12 +69,12 @@
         <div v-else-if='context.type == "less"'>
             <p>Enter to change from {{ this.context.oldName + " < " }}{{ this.context.oldScore }}</p>
             <p><input type="text" placeholder='new flag name' v-model="flagName" maxlength="40" @keypress.enter.prevent="addExp('less')"/>
-            {{ " < "}}<input type="number" placeholder='new flag score' v-model="flagValue" @keypress.enter.prevent="addExp('less')"/></p>
+            {{ " < "}}<input type="number" placeholder='new flag score' v-model="flagScore" @keypress.enter.prevent="addExp('less')"/></p>
         </div>
         <div v-else-if='context.type == "diff"'>
             <p>Enter to change from {{ this.context.oldName }} =/= {{ this.context.oldValue }}</p>
             <p><input type="text" placeholder='new flag name' v-model="flagName" maxlength="40" @keypress.enter.prevent="addExp('diff')"/>
-            {{ " =/= " }}<input type="text" placeholder='new flag score' v-model="flagScore" maxlength="40" @keypress.enter.prevent="addExp('diff')"/></p>
+            {{ " =/= " }}<input type="text" placeholder='new flag value' v-model="flagValue" maxlength="40" @keypress.enter.prevent="addExp('diff')"/></p>
         </div>
         <div v-else>
             something went wrong ^^
@@ -99,7 +99,6 @@ export default {
                 type: flagType
             }
             if (this.context.editing) {
-                if (this.context.oldName == this.flagName) return
                 stuff.oldName = this.context.oldName
             }
             if (flagType == 'flag' && stuff.name != "") {
