@@ -149,7 +149,84 @@
         <div class='accordion-body'>
 
           <!-- (DEV) sceneID: {{ scene.keyName }} -->
-          <div>scene: <input v-model='scriptObj["scene__" + scene.keyName].name' /> written by: <input v-model='scriptObj["scene__" + scene.keyName].author' /></div>
+          <div>
+            scene:<input class='mx-2 mt-2' v-model='scriptObj["scene__" + scene.keyName].name' /> 
+            written by:<input class='mx-2 mt-2' v-model='scriptObj["scene__" + scene.keyName].author' />
+            <!-- bg section -->
+            <button class="mx-2 mt-2 btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonBG'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+              background: {{ scriptObj["scene__" + scene.keyName].background }}
+            </button>                    
+            <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonBG'+scene.keyName">
+              <li v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
+                <button type='button' class='dropdown-item'  @click='selectBG(scene.keyName, bg)'>{{ bg }}</button>
+              </li>
+              <li class='dropdown-item'>
+                <button @click='updateModalContext({
+                  scene: scene.keyName,
+                  line: "",
+                  isEditing: false,
+                  second: "",
+                  type: "background"
+                  })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                  add new background
+                </button>
+              </li>
+            </ul>
+
+            <!-- ost section  -->
+            <button class="mx-2 mt-2 btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonOST'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+              music: {{ scriptObj["scene__" + scene.keyName].ost }}
+            </button>                
+            <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonOST'+scene.keyName">
+              <li v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
+                <button type='button' class='dropdown-item'  @click='selectOST(scene.keyName, ost)'>{{ ost }}</button>
+              </li>
+              <li class='dropdown-item'>
+                <button @click='updateModalContext({
+                  scene: scene.keyName,
+                  line: "",
+                  isEditing: false,
+                  second: "",
+                  type: "music"
+                  })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                  add new music
+                </button>
+              </li>
+            </ul>
+
+            <!-- flag section -->
+            <button class="mx-2 mt-2 btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonFlagSet' data-bs-toggle="dropdown" aria-expanded="false">
+              flags given by scene
+            </button>
+            <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlagSet'>
+              <li class='dropdown-item' v-for='(flag2, index23) in scene.meta__flagList' :key='index23'>
+                <button type='button' class='btn btn-link' @click='removeFlagFromScene(scene.keyName, flag2)'>[x]</button>
+                <button class='btn btn-link' @click='updateModalContext({
+                  scene: scene.keyName,
+                  line: "",
+                  isEditing: true,
+                  second: "",
+                  type: "flag",
+                  setterFlag: true,
+                  old: flag2
+                  })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag2, true) }}</button>
+              </li>
+              <li class='dropdown-item'>
+                <button @click='updateModalContext({
+                  scene: scene.keyName,
+                  line: "",
+                  isEditing: false,
+                  type: "flag",
+                  second: "",
+                  setterFlag: true
+                  })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                  add new flag
+                </button>
+              </li>
+            </ul>
+
+            <button class="mx-2 mt-2 btn btn-link" @click='onAddScene(scene.keyName, scene.next)'>add scene</button>
+          </div>
 
           <!-- section to display line for edit -->
           <div class='card-body container-fluid'>
@@ -298,93 +375,6 @@
           </div>
 
           <p>~~o0o~~</p>
-          <!-- other scene info section -->
-          <button class="btn btn-secondary" type="button" data-bs-toggle="collapse" :data-bs-target="'#collapseBGOST' + scene.keyName" aria-expanded="false" :aria-controls="'collapseBGOST' + scene.keyName">
-            toggle background and music
-          </button>
-          <div class='collapse container-lg' :id='"collapseBGOST" + scene.keyName'>
-            <div class='row'>
-              <!-- bg section -->
-              <div class="col dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonBG'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-                  background: {{ scriptObj["scene__" + scene.keyName].background }}
-                </button>                    
-                <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonBG'+scene.keyName">
-                  <li v-for='(bg, index10) in scriptObj.meta__bgList' :key='index10'>
-                    <button type='button' class='dropdown-item'  @click='selectBG(scene.keyName, bg)'>{{ bg }}</button>
-                  </li>
-                  <li class='dropdown-item'>
-                    <button @click='updateModalContext({
-                      scene: scene.keyName,
-                      line: "",
-                      isEditing: false,
-                      second: "",
-                      type: "background"
-                      })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                      add new background
-                    </button>
-                  </li>
-                </ul>
-              </div>
-
-              <!-- ost section  -->
-              <div class="col dropdown">
-                <button class="btn btn-secondary dropdown-toggle" type="button" :id="'dropdownMenuButtonOST'+scene.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-                  music: {{ scriptObj["scene__" + scene.keyName].ost }}
-                </button>                
-                <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonOST'+scene.keyName">
-                  <li v-for='(ost, index11) in scriptObj.meta__ostList' :key='index11'>
-                    <button type='button' class='dropdown-item'  @click='selectOST(scene.keyName, ost)'>{{ ost }}</button>
-                  </li>
-                  <li class='dropdown-item'>
-                    <button @click='updateModalContext({
-                      scene: scene.keyName,
-                      line: "",
-                      isEditing: false,
-                      second: "",
-                      type: "music"
-                      })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                      add new music
-                    </button>
-                  </li>
-                </ul>
-              </div>
-
-              <!-- flag section -->
-              <div class='col dropdown'>
-                <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonFlagSet' data-bs-toggle="dropdown" aria-expanded="false">
-                  flags given by scene
-                </button>
-                <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlagSet'>
-                  <li class='dropdown-item' v-for='(flag2, index23) in scene.meta__flagList' :key='index23'>
-                    <button type='button' class='btn btn-link' @click='removeFlagFromScene(scene.keyName, flag2)'>[x]</button>
-                    <button class='btn btn-link' @click='updateModalContext({
-                      scene: scene.keyName,
-                      line: "",
-                      isEditing: true,
-                      second: "",
-                      type: "flag",
-                      setterFlag: true,
-                      old: flag2
-                      })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag2, true) }}</button>
-                  </li>
-                  <li class='dropdown-item'>
-                    <button @click='updateModalContext({
-                      scene: scene.keyName,
-                      line: "",
-                      isEditing: false,
-                      type: "flag",
-                      second: "",
-                      setterFlag: true
-                      })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                      add new flag
-                    </button>
-                  </li>
-                </ul>
-              </div>
-            </div>
-          </div>
-
           <div class='text-muted'>
             lines: {{ getLines(scene).length }}
             <!-- button to add line (indexed unique name) -->
