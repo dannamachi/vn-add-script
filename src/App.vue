@@ -113,6 +113,7 @@
                 isEditing: true,
                 second: "",
                 type: "flag",
+                setterFlag: false,
                 old: flag
                 })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag) }}</button>
             </li>
@@ -122,7 +123,8 @@
                 line: "",
                 isEditing: false,
                 type: "flag",
-                second: ""
+                second: "",
+                setterFlag: false
                 })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
                 add new flag
               </button>
@@ -702,10 +704,13 @@ export default {
       this.modalContext.success = 'yes'
     },
 
-    getFlagDisplay(flag) {
-      if (flag.type == 'flag') return 'has ' + flag.name 
-      if (flag.type == 'score') return flag.name + '=' + flag.score
-      if (flag.type == 'value') return flag.name + ':' + flag.value
+    getFlagDisplay(flag, setter=false) {
+      if (flag.type == 'flag') return (setter ? 'need ' : 'give ') + flag.name 
+      if (flag.type == 'score') return flag.name + ' = ' + flag.score
+      if (flag.type == 'value') return flag.name + ' : ' + flag.value
+      if (flag.type == 'more') return flag.name + ' > ' + flag.score
+      if (flag.type == 'less') return flag.name + ' < ' + flag.score
+      if (flag.type == 'diff') return flag.name + ' =/= ' + flag.value
       return 'invalid flag'
     },
     getAllSprites(noNar=false) {

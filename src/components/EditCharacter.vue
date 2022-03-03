@@ -5,8 +5,8 @@
             <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">
-                    <div v-if='!context.isEditing'>New {{ context.type }}</div>
-                    <div v-else>Edit {{ context.type }}</div>
+                    <div v-if='!context.isEditing'>New {{ context.type }} {{ context.type =="flag" && context.setterFlag ? "that is being set" : "that is needed" }}</div>
+                    <div v-else>Edit {{ context.type }} {{ context.type =="flag" && context.setterFlag ? "that is being set" : "that is needed" }}</div>
                 </h5>
                 <button type="button" @click='closeModal()' class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
@@ -72,6 +72,7 @@ export default {
         getEditContext() {
             var stuff = {
                 editing: this.context.isEditing,
+                setterFlag: this.context.setterFlag
             }
             if (this.context.isEditing) {
                 stuff.type = this.context.old.type
