@@ -15,7 +15,8 @@
                     <p>Enter to add new {{ context.type }}:</p>
 
                     <!-- comp to add new global stuff-->
-                    <AddGlobalStuff v-bind:stuffType='context.type' @add-exp='onAddSprite' />
+                    <EditFlag v-if='context.type == "flag"' v-bind:context="getEditContext()" @add-exp="onEditFlag" />
+                    <AddGlobalStuff v-else v-bind:stuffType='context.type' @add-exp='onAddSprite' />
 
                     <div v-if='context.success=="yes"' class="alert alert-success" role="alert">
                         new {{ context.type }} added !
@@ -25,8 +26,13 @@
                     </div>
                 </div>
                 <div v-else>
-                    <p>Enter to change from '{{ this.context.oldName }}':</p>
-                    <input type="text" v-model="nameValue" maxlength="40" @keypress.enter.prevent="onAddSprite(null)"/>
+                    <div v-if='context.type == "flag"'>
+                        <EditFlag v-bind:context="getEditContext()" @add-exp="onEditFlag" />
+                    </div>
+                    <div v-else>
+                        <p>Enter to change from '{{ this.context.oldName }}':</p>
+                        <input type="text" v-model="nameValue" maxlength="40" @keypress.enter.prevent="onAddSprite(null)"/>
+                    </div>
                     <div v-if='context.success=="yes"' class="alert alert-success" role="alert">
                         {{ context.type}} updated !
                     </div>
@@ -46,11 +52,13 @@
 
 <script>
 import AddGlobalStuff from './AddGlobalStuff.vue'
+import EditFlag from './EditFlag.vue'
 
 export default {
     props: ['context'],
     components: {
-        AddGlobalStuff
+        AddGlobalStuff,
+        EditFlag
     },
     data() {
         return {
@@ -58,6 +66,21 @@ export default {
         }
     },
     methods: {
+        onEditFlag(stuff) {
+            this.$emit('addExp', stuff)
+        },
+        getEditContext() {
+            var stuff = {
+                editing: this.context.isEditing,
+            }
+            if (this.context.isEditing) {
+                stuff.type = this.context.old.type
+                stuff.oldName = this.context.old.name
+                if (this.context.old.type == 'score') stuff.oldScore = this.context.old.score
+                if (this.context.old.type == 'value') stuff.oldValue = this.context.old.value
+            }
+            return stuff
+        },
         closeModal() {
             this.$emit('closeModal')
         },

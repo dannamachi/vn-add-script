@@ -1,4 +1,5 @@
 <template>
+  <!-- nav bar -->
   <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">
@@ -37,6 +38,7 @@
     </div>
   </nav>
 
+  <!-- section info tab -->
   <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item" role="presentation">
       <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">section info</button>
@@ -46,6 +48,9 @@
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">edit characters</button>
+    </li>
+    <li class="nav-item" role="presentation">
+      <button class="nav-link" id="flag-tab" data-bs-toggle="tab" data-bs-target="#flag" type="button" role="tab" aria-controls="flag" aria-selected="false">edit flags</button>
     </li>
   </ul>
   <div class="tab-content" id="myTabContent">
@@ -94,6 +99,36 @@
               second: ""
               })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
               add new character
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+    <div class="tab-pane" id="flag" role="tabpanel" aria-labelledby="flag-tab">
+      <div class="dropdown mb-2 mt-2">
+        <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonFlag' data-bs-toggle="dropdown" aria-expanded="false">
+          required flags
+        </button>
+        <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlag'>
+          <li v-for='(flag, index22) in scriptObj.meta__flagList' :key='index22'>
+            <button type='button' class='dropdown-item' @click='updateModalContext({
+              scene: "",
+              line: "",
+              isEditing: true,
+              second: "",
+              type: "flag",
+              old: flag
+              })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag) }}</button>
+          </li>
+          <li class='dropdown-item'>
+            <button @click='updateModalContext({
+              scene: "",
+              line: "",
+              isEditing: false,
+              type: "flag",
+              second: ""
+              })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+              add new flag
             </button>
           </li>
         </ul>
@@ -353,7 +388,10 @@ export default {
       },
       // linked list start end
       'meta__startName'   : '',
-      'meta__endName'     : ''
+      'meta__endName'     : '',
+
+      // flags
+      'meta__flagList' : []
     })
     return { scriptObj }
   },
@@ -379,6 +417,40 @@ export default {
     this.addNewScene()
   },
   methods: {
+    onAddFlag(stuff) {
+      for (var pos of this.scriptObj.meta__flagList) {
+        if (pos.name == stuff.name) {
+          this.modalContext.success = 'no'
+          return;
+        }
+      }
+      this.scriptObj.meta__flagList.push(stuff);
+      this.modalContext.success = 'yes'
+    },
+    onEditFlag(stuff) {
+      var found = -1
+      for (var i=0; i < this.scriptObj.meta__flagList.length; i++) {
+        if (this.scriptObj.meta__flagList[i].name == stuff.name) {
+          if (this.scriptObj.meta__flagList[i].name != stuff.oldName) {
+            this.modalContext.success = 'no'
+            return;
+          } 
+        }
+        if (this.scriptObj.meta__flagList[i].name == stuff.oldName) {
+          found = i
+        }
+      }
+
+      if (found == -1) {
+        this.modalContext.success = 'no'
+        return;
+      }
+      this.scriptObj.meta__flagList.splice(found, 1)
+      delete stuff['oldName']
+
+      this.scriptObj.meta__flagList.push(stuff);
+      this.modalContext.success = 'yes'
+    },
     onModalProcess(stuff) {
       if (this.modalContext.type == 'character' && !this.modalContext.isEditing) {
         this.onAddSprite(stuff)
@@ -386,6 +458,9 @@ export default {
         this.onAddExpression(stuff)
       } else if (this.modalContext.type == 'position' && !this.modalContext.isEditing) {
         this.onAddPosition(stuff)
+      } else if (this.modalContext.type == 'flag') {
+        if (this.modalContext.isEditing) this.onEditFlag(stuff)
+        else this.onAddFlag(stuff)
       }
     },
     onEditChara(stuff) {
@@ -440,6 +515,7 @@ export default {
       this.modalContext.isOpen = false
       this.modalContext.success = ''
     },
+
     updateModalContext(newUpdate) {
       for (const [key, value] of Object.entries(newUpdate)) {
         this.modalContext[key] = value
@@ -448,6 +524,7 @@ export default {
       this.modalContext.isOpen = true
       this.modalContext.success = ''
     },
+
     checkScript(script) {
       var sceneCount = 0;
       var charCount = 0;
@@ -509,6 +586,7 @@ export default {
     selectPosition(sceneName, lineName, spriteName, pos) {
       this.scriptObj["scene__" + sceneName]["line__" + lineName]["sprite__" + spriteName].pos = pos
     },
+
     isSpriteAddedToLine(spriteName, line) {
       if (spriteName == "__narrator") return true
       for (var sp of this.getSprites(line)) {
@@ -516,6 +594,7 @@ export default {
       }
       return false;
     },
+
     removeSpriteFromDisplay(sceneName, lineName, spriteName) {
       this.scriptObj['scene__' + sceneName]['line__' + lineName]['sprite__' + spriteName].included = false
     },
@@ -541,6 +620,7 @@ export default {
       // push to line
       this.scriptObj['scene__' + sceneName]['line__' + lineName]['sprite__' + spriteName] = spriteObj
     },
+    
     onAddSprite(spObj) {
       if (spObj.sprite == '__narrator') {
         this.modalContext.success = 'no'
@@ -621,6 +701,13 @@ export default {
         this.selectExpression(expObj.selectExpression.scene, expObj.selectExpression.line, expObj.selectExpression.sprite, expObj.exp)
       }
       this.modalContext.success = 'yes'
+    },
+
+    getFlagDisplay(flag) {
+      if (flag.type == 'flag') return 'has ' + flag.name 
+      if (flag.type == 'score') return flag.name + '=' + flag.score
+      if (flag.type == 'value') return flag.name + ':' + flag.value
+      return 'invalid flag'
     },
     getAllSprites(noNar=false) {
       var sList = []
