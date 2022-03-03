@@ -47,10 +47,7 @@
       <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">load section</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">edit characters</button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="flag-tab" data-bs-toggle="tab" data-bs-target="#flag" type="button" role="tab" aria-controls="flag" aria-selected="false">edit flags</button>
+      <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">characters & flags</button>
     </li>
   </ul>
   <div class="tab-content" id="myTabContent">
@@ -75,63 +72,63 @@
       </div>
     </div>
     <div class="tab-pane" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-      <div class="dropdown mt-2 mb-2">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonEChara' data-bs-toggle="dropdown" aria-expanded="false">
-          select character to edit
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonEChara">
-          <li v-for='(speaking2, index21) in getAllSprites(true)' :key='index21'>
-            <button type='button' class='dropdown-item' data-bs-toggle="modal" data-bs-target="#exampleModal" @click='updateModalContext({
-              scene: "",
-              line: "",
-              isEditing: true,
-              second: "",
-              type: "character",
-              oldName: speaking2.name
-              })'>{{ speaking2.name }}</button>
-          </li>
-          <li class='dropdown-item'>
-            <button @click='updateModalContext({
-              scene: "",
-              line: "",
-              isEditing: false,
-              type: "character",
-              second: ""
-              })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-              add new character
-            </button>
-          </li>
-        </ul>
-      </div>
-    </div>
-    <div class="tab-pane" id="flag" role="tabpanel" aria-labelledby="flag-tab">
-      <div class="dropdown mb-2 mt-2">
-        <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonFlag' data-bs-toggle="dropdown" aria-expanded="false">
-          required flags
-        </button>
-        <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlag'>
-          <li v-for='(flag, index22) in scriptObj.meta__flagList' :key='index22'>
-            <button type='button' class='dropdown-item' @click='updateModalContext({
-              scene: "",
-              line: "",
-              isEditing: true,
-              second: "",
-              type: "flag",
-              old: flag
-              })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag) }}</button>
-          </li>
-          <li class='dropdown-item'>
-            <button @click='updateModalContext({
-              scene: "",
-              line: "",
-              isEditing: false,
-              type: "flag",
-              second: ""
-              })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-              add new flag
-            </button>
-          </li>
-        </ul>
+      <div class="mt-1 mb-1">
+        <div class='dropdown mt-1 mb-1'>
+          <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonEChara' data-bs-toggle="dropdown" aria-expanded="false">
+            select character to edit
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonEChara">
+            <li v-for='(speaking2, index21) in getAllSprites(true)' :key='index21'>
+              <button type='button' class='dropdown-item' data-bs-toggle="modal" data-bs-target="#exampleModal" @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: true,
+                second: "",
+                type: "character",
+                oldName: speaking2.name
+                })'>{{ speaking2.name }}</button>
+            </li>
+            <li class='dropdown-item'>
+              <button @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: false,
+                type: "character",
+                second: ""
+                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                add new character
+              </button>
+            </li>
+          </ul>
+          </div>
+        <div class='dropdown mt-1 mb-1'>
+          <button class="btn btn-secondary dropdown-toggle" type="button" id='dropdownMenuButtonFlag' data-bs-toggle="dropdown" aria-expanded="false">
+            select flag to edit
+          </button>
+          <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlag'>
+            <li v-for='(flag, index22) in scriptObj.meta__flagList' :key='index22'>
+              <button type='button' class='dropdown-item' @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: true,
+                second: "",
+                type: "flag",
+                old: flag
+                })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag) }}</button>
+            </li>
+            <li class='dropdown-item'>
+              <button @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: false,
+                type: "flag",
+                second: ""
+                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                add new flag
+              </button>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   </div>
