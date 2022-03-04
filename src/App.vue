@@ -1,6 +1,6 @@
 <template>
   <!-- nav bar -->
-  <nav class="navbar sticky-top navbar-expand-lg navbar-light bg-light">
+  <nav class="navbar navbar-dark sticky-top navbar-expand-lg bg-dark">
     <div class="container-fluid">
       <a class="navbar-brand" href="#">
         <img alt="my logo" src="./assets/icon_cropped.png" width='30' height='30'>
@@ -11,26 +11,26 @@
       <div class="collapse navbar-collapse" id="navbarScroll">
         <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
           <!-- script info nav -->
-          <li class="nav-item">
+          <li class="nav-item mt-1">
             <a class="nav-link" href="#scriptInfo">{{ scriptObj.meta__name }}</a>
           </li>
           <!-- scene list -->
-          <li class="nav-item dropdown">
+          <li class="nav-item mt-1 dropdown">
             <a class="nav-link dropdown-toggle" id="navbarScrollingDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
               scenes
             </a>
-            <ul class="dropdown-menu" aria-labelledby="navbarScrollingDropdown">
+            <ul class="dropdown-menu dropdown-menu-dark" aria-labelledby="navbarScrollingDropdown">
               <li v-for='(sceneLink, index20) in getScenes()' :key="index20">
                 <a class='dropdown-item' :href='"#sceneHeading"+sceneLink.keyName'>{{ sceneLink.name }}</a>
               </li>
             </ul>
           </li>
           <!-- add scene -->
-          <li class='nav-item mx-1 mt-2'>
+          <li class='nav-item mx-1 mt-1 mb-1'>
             <button class="btn btn-primary" @click='addNewScene()'>add scene</button>
           </li>
           <!-- download -->
-          <li class='nav-item mx-1 mt-2'>
+          <li class='nav-item mx-1 mt-1 mb-1'>
               <HelloWorld v-bind:jsonArr='scriptObj' />
           </li>
         </ul>
@@ -47,6 +47,9 @@
       <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">load section</button>
     </li>
     <li class="nav-item" role="presentation">
+      <button class="nav-link" id="link-section-tab" data-bs-toggle="tab" data-bs-target="#link-section" type="button" role="tab" aria-controls="link-section" aria-selected="false">link section</button>
+    </li>
+    <li class="nav-item" role="presentation">
       <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">characters & flags</button>
     </li>
   </ul>
@@ -54,9 +57,11 @@
     <div class="tab-pane show active" id="home" role="tabpanel" aria-labelledby="home-tab">
       <div class='pt-2 pb-2'>
         name: 
-        <input class='mx-2' v-model='scriptObj.meta__name' /> 
+        <input class='mx-1' v-model='scriptObj.meta__name' /> 
         author: 
-        <input class='mx-2' v-model='scriptObj.meta__author' />
+        <input class='mx-1' v-model='scriptObj.meta__author' />
+        preceding section:
+        <input class='mx-1' placeholder='another section id' v-model='scriptObj.meta__previous' />
       <!-- <div>{{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)</div> -->
       </div>
     </div>
@@ -128,7 +133,15 @@
         </ul>
       </div>
     </div>
+    <div class="tab-pane" id="link-section" role="tabpanel" aria-labelledby="link-section-tab">
+      <div class='mt-2 mb-2'>
+        to set another section to follow after this one,
+        <button type='button' @click='copySectionID()' class='btn btn-outline-primary btn-sm'>click here</button>
+        or copy below and paste under section info of the other section
+      </div>
+    </div>
   </div>
+  <div class='bg-light text-muted'>section id: {{ scriptObj.meta__id }}</div>
 
   <!-- accordion for scene list -->
   <div class="accordion card" id="sceneList">
@@ -136,7 +149,7 @@
     <div class="accordion-item card" v-for='(scene, index) in getScenes()' :key="'scene' + scene.keyName">
       <h3 class='accordion-header' :id='"sceneHeading"+scene.keyName'>
         <button class='accordion-button' type='button' data-bs-toggle='collapse' :data-bs-target='"#sceneCollapse"+scene.keyName' aria-expanded="true" :aria-controls='"sceneCollapse"+scene.keyName'>
-          {{ scriptObj["scene__" + scene.keyName].name }} {{index}}
+          {{ scriptObj["scene__" + scene.keyName].name }}
         </button>
       </h3>
       <div :id='"sceneCollapse"+scene.keyName' :class="{'accordion-collapse':true, collapse: true, show: index == scriptObj.meta__scount - 1}" :aria-labelledby='"sceneHeading"+scene.keyName' data-bs-parent="#sceneList">
@@ -401,6 +414,7 @@ export default {
   },
   setup() {
     const scriptObj = reactive({
+      'meta__id'      : uuidv4(),
       'meta__name'    : "New section",
       'meta__author'  : 'Cool Author',
       'meta__updated' : new Date().toString(),
@@ -420,7 +434,10 @@ export default {
       'meta__endName'     : '',
 
       // flags
-      'meta__flagList' : []
+      'meta__flagList' : [],
+
+      // prev link
+      'meta__previous' : ''
     })
     return { scriptObj }
   },
@@ -446,6 +463,13 @@ export default {
     this.addNewScene()
   },
   methods: {
+      async copySectionID() {
+      try {
+        await navigator.clipboard.writeText(this.scriptObj.meta__id);
+      } catch(e) {
+        e
+      }
+    },
     removeFlag(stuff) {
       var found = -1;
       for (var i=0; i<this.scriptObj.meta__flagList.length; i++) {
@@ -631,6 +655,8 @@ export default {
       } else {
         script.meta__flagList = []
       }
+      if (script.meta__previous == null) script.meta__previous = ''
+      if (script.meta__id == null) script.meta__id = uuidv4()
 
       // all meta fields
       for (const [key, value] of Object.entries(this.scriptObj)) {
@@ -699,7 +725,6 @@ export default {
                   for (const [key7, value7] of Object.entries(baseSprite)) {
                     value7
                     if (value6[key7] == null) {
-                      console.log(value6[key7])
                       return false
                     }
                   }
@@ -712,7 +737,6 @@ export default {
           for (const [key9, value9] of Object.entries(baseChar)) {
             value9
             if (value2[key9] == null) {
-              console.log(value2[key9])
               return false
             }
           }
@@ -736,7 +760,7 @@ export default {
         else {
           for (const [key1, value1] of Object.entries(this.scriptObj)) {
             value1
-            if (!script[key1]) delete this.scriptObj[key1]
+            if (script[key1] == null) delete this.scriptObj[key1]
           }
           for (const [key, value] of Object.entries(script)) {
             this.scriptObj[key] = value
