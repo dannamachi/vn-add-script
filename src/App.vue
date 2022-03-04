@@ -611,15 +611,114 @@ export default {
     },
 
     checkScript(script) {
+      // TO DO: api version separate check
+
       var sceneCount = 0;
       var charCount = 0;
+
+      // flag meta (backward compat)
+      if (script.meta__flagList) {
+        var baseFlag = {
+          name: '',
+          type: ''
+        }
+        for (var fl of script.meta__flagList) {
+          for (const [key8, value8] of Object.entries(baseFlag)) {
+            value8
+            if (fl[key8] == null) return false
+          }
+        }
+      } else {
+        script.meta__flagList = []
+      }
+
       // all meta fields
       for (const [key, value] of Object.entries(this.scriptObj)) {
         value
-        if (key.startsWith('meta__' && !script[key])) {
+        if (key.startsWith('meta__' && script[key] == null)) {
           return false;
         }
       }
+      if (!script.char____narrator) return false
+
+      // scene and line and sprite meta fields
+      var baseScene = {
+        name : '',
+        author: '',
+        keyName : '',
+        next: '',
+        previous: '',
+        background: '',
+        ost: '',
+        meta__flagList: [],
+        meta__startName: '',
+        meta__endName: ''
+      }
+      var baseLine = {
+        keyName : '',
+        speaker: '',
+        text: '',
+        next: '',
+        previous: ''
+      }
+      var baseChar = {
+        keyName: '',
+        name: '',
+        expList: []
+      }
+      var baseSprite = {
+        keyName: '',
+        name: '',
+        expList: [],
+        pos: '',
+        exp: '',
+        included: true
+      }
+      for (const [key2, value2] of Object.entries(script)) {
+        // scene meta
+        if (key2.startsWith('scene__')) {
+          for (const [key3, value3] of Object.entries(baseScene)) {
+            value3
+            if (value2[key3] == null) {
+              if (key3 == 'meta__flagList') script[key2].meta__flagList = []
+              else {
+                return false
+              }
+            }
+          }
+          // line meta
+          for (const [key4, value4] of Object.entries(value2)) {
+            if (key4.startsWith('line__')) {
+              for (const [key5, value5] of Object.entries(baseLine)) {
+                value5
+                if (value4[key5] == null) return false
+              }
+              // sprite meta
+              for (const [key6, value6] of Object.entries(value4)) {
+                if (key6.startsWith('sprite__')) {
+                  for (const [key7, value7] of Object.entries(baseSprite)) {
+                    value7
+                    if (value6[key7] == null) {
+                      console.log(value6[key7])
+                      return false
+                    }
+                  }
+                }
+              }
+            }
+          }
+        // char meta
+        } else if (key2.startsWith('char__') && key2 != 'char____narrator') {
+          for (const [key9, value9] of Object.entries(baseChar)) {
+            value9
+            if (value2[key9] == null) {
+              console.log(value2[key9])
+              return false
+            }
+          }
+        }
+      }
+
       // count scene and char
       for (const[key1, value1] of Object.entries(script)) {
         value1
@@ -642,6 +741,7 @@ export default {
           for (const [key, value] of Object.entries(script)) {
             this.scriptObj[key] = value
           }
+          this.inputJSON = ''
         }
       }
       catch(err) {
