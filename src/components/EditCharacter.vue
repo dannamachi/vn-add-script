@@ -63,15 +63,27 @@ export default {
     },
     methods: {
         onEditFlag(stuff) {
-            if (!this.context.setterFlag) this.$emit('addExp', stuff)
-            else if (this.context.scene != '') {
-                this.$emit('addExp', {
-                    scene: this.context.scene,
-                    item: stuff
-                })
-            } else this.$emit('addExp', {
-                item: stuff
-            })
+            if (!this.context.setterFlag) {
+                if (this.context.scene == '') this.$emit('addExp', { item: stuff})
+                else {
+                    this.$emit('addExp', {
+                        scene: this.context.scene,
+                        item: stuff
+                    })
+                }
+            }
+            else {
+                if (this.context.scene != '') {
+                    this.$emit('addExp', {
+                        scene: this.context.scene,
+                        item: stuff
+                    })
+                } else {
+                    this.$emit('addExp', {
+                        item: stuff
+                    })
+                }
+            } 
         },
         getEditContext() {
             var stuff = {

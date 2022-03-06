@@ -271,7 +271,38 @@
               </li>
             </ul>
 
-            <!-- flag per scene, for achievements -->
+            <!-- flag required by scenes, for hidden scenes -->
+            <button class="mx-2 mt-2 btn btn-info dropdown-toggle" type="button" id='dropdownMenuButtonFlagSet' data-bs-toggle="dropdown" aria-expanded="false">
+              flags required by scene
+            </button>
+            <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlagSet'>
+              <li class='dropdown-item' v-for='(flag4, index23) in scene.meta__flagRList' :key='index23'>
+                <button type='button' class='btn btn-link' @click='removeFlagToScene(scene.keyName, flag4)'>[x]</button>
+                <button class='btn btn-link' @click='updateModalContext({
+                  scene: scene.keyName,
+                  line: "",
+                  isEditing: true,
+                  second: "",
+                  type: "flag",
+                  setterFlag: false,
+                  old: flag4
+                  })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag4, true) }}</button>
+              </li>
+              <li class='dropdown-item'>
+                <button @click='updateModalContext({
+                  scene: scene.keyName,
+                  line: "",
+                  isEditing: false,
+                  type: "flag",
+                  second: "",
+                  setterFlag: false
+                  })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                  add new flag
+                </button>
+              </li>
+            </ul>
+
+            <!-- flag given by scene, for achievements -->
             <button class="mx-2 mt-2 btn btn-info dropdown-toggle" type="button" id='dropdownMenuButtonFlagSet' data-bs-toggle="dropdown" aria-expanded="false">
               flags given by scene
             </button>
@@ -534,6 +565,15 @@ export default {
     this.addNewScene()
   },
   methods: {
+    isDuplicateFlagScene(scene, fname, notThisName='') {
+      for (var pos of this.scriptObj['scene__' + scene].meta__flagRList) {
+        if (pos.name == fname) {
+          if (notThisName != '' && pos.name == notThisName) continue
+          else return true
+        }
+      }
+      return false
+    },
     isDuplicateFlag(fname, notThisName='') {
       // check list
       for (var pos of this.scriptObj.meta__flagList) {
@@ -603,7 +643,45 @@ export default {
       }
       this.scriptObj['scene__' + scene].meta__flagList.splice(found, 1)
     },
+    removeFlagToScene(scene, stuff) {
+      var found = -1
+      for (var i=0; i < this.scriptObj['scene__' + scene].meta__flagRList.length; i++) {
+        if (this.scriptObj['scene__' + scene].meta__flagRList[i].name == stuff.name) {
+          found = i
+        }
+      }
+      this.scriptObj['scene__' + scene].meta__flagRList.splice(found, 1)
+    },
 
+    onEditFlagToScene(scene, stuff) {
+      var found = -1
+      if (this.isDuplicateFlagScene(scene, stuff.name, stuff.oldName)) {
+        this.modalContext.success = 'no'
+        return;
+      }
+      for (var i=0; i < this.scriptObj['scene__' + scene].meta__flagRList.length; i++) {
+        // if (this.scriptObj.meta__flagList[i].name == stuff.name) {
+        //   if (this.scriptObj.meta__flagList[i].name != stuff.oldName) {
+        //     this.modalContext.success = 'no'
+        //     return;
+        //   } 
+        // }
+        if (this.scriptObj['scene__' + scene].meta__flagRList[i].name == stuff.oldName) {
+          found = i
+        }
+      }
+
+      if (found == -1) {
+        this.modalContext.success = 'no'
+        return;
+      }
+      this.scriptObj['scene__' + scene].meta__flagRList.splice(found, 1)
+      delete stuff['oldName']
+
+      this.scriptObj['scene__' + scene].meta__flagRList.push(stuff);
+      this.modalContext.success = 'yes'
+      this.modalContext.old = stuff
+    },
     onEditFlagFromSection(sstuff) {
       var stuff = sstuff.item
       var found = -1
@@ -663,6 +741,14 @@ export default {
       this.scriptObj['scene__' + sstuff.scene].meta__flagList.push(stuff);
       this.modalContext.success = 'yes'
       this.modalContext.old = stuff
+    },
+    onAddFlagToScene(scene, stuff) {
+      if (this.isDuplicateFlagScene(scene, stuff.name)) {
+        this.modalContext.success = 'no'
+        return;
+      }
+      this.scriptObj['scene__' + scene].meta__flagRList.push(stuff);
+      this.modalContext.success = 'yes'
     },
     onAddFlagFromSection(sstuff) {
       var stuff = sstuff.item
@@ -732,7 +818,10 @@ export default {
         this.onAddPosition(stuff)
       } else if (this.modalContext.type == 'flag') {
         if (this.modalContext.isEditing) {
-          if (!this.modalContext.setterFlag) this.onEditFlag(stuff)
+          if (!this.modalContext.setterFlag) {
+            if (!stuff.scene) this.onEditFlag(stuff.item)
+            else this.onEditFlagToScene(stuff.scene, stuff.item)
+          }
           else {
             if (stuff.scene) this.onEditFlagFromScene(stuff)
             else this.onEditFlagFromSection(stuff)
@@ -740,7 +829,8 @@ export default {
         }
         else {
           if (!this.modalContext.setterFlag) {
-            this.onAddFlag(stuff)
+            if (!stuff.scene) this.onAddFlag(stuff.item)
+            else this.onAddFlagToScene(stuff.scene, stuff.item)
           }
           else {
             if (stuff.scene) this.onAddFlagFromScene(stuff)
@@ -1250,7 +1340,8 @@ export default {
         previous: lastName,
         background: this.scriptObj.meta__bgList[0],
         ost: this.scriptObj.meta__ostList[0],
-        meta__flagList: []
+        meta__flagList: [],
+        meta__flagRList: []
       }
 
       // add to script obj
