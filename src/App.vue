@@ -12,7 +12,7 @@
         <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
           <!-- section info and load nav -->
           <li class="nav-item mt-1">
-            <a class="nav-link" href="#scriptInfo">editing section</a>
+            <a class="nav-link" href="#myTab">editing section</a>
           </li>
           <!-- scene list -->
           <li class="nav-item mt-1 dropdown">
@@ -532,6 +532,12 @@ export default {
       }
 
       // check glist
+      for (var pos2 of this.scriptObj.meta__flagGList) {
+        if (pos2.name == fname) {
+          if (notThisName != '' && pos2.name == notThisName) continue
+          else return true
+        }
+      }
 
       // check scene
       for (const [key, value] of Object.entries(this.scriptObj)) {
@@ -572,6 +578,37 @@ export default {
         }
       }
       this.scriptObj.meta__flagGList.splice(found,1)
+    },
+
+    onEditFlagFromSection(sstuff) {
+      var stuff = sstuff.item
+      var found = -1
+      if (this.isDuplicateFlag(stuff.name, stuff.oldName)) {
+        this.modalContext.success = 'no'
+        return;
+      }
+      for (var i=0; i < this.scriptObj.meta__flagGList.length; i++) {
+        // if (this.scriptObj.meta__flagList[i].name == stuff.name) {
+        //   if (this.scriptObj.meta__flagList[i].name != stuff.oldName) {
+        //     this.modalContext.success = 'no'
+        //     return;
+        //   } 
+        // }
+        if (this.scriptObj.meta__flagGList[i].name == stuff.oldName) {
+          found = i
+        }
+      }
+
+      if (found == -1) {
+        this.modalContext.success = 'no'
+        return;
+      }
+      this.scriptObj.meta__flagGList.splice(found, 1)
+      delete stuff['oldName']
+
+      this.scriptObj.meta__flagGList.push(stuff);
+      this.modalContext.success = 'yes'
+      this.modalContext.old = stuff
     },
     onEditFlagFromScene(sstuff) {
       var stuff = sstuff.item
@@ -672,7 +709,10 @@ export default {
       } else if (this.modalContext.type == 'flag') {
         if (this.modalContext.isEditing) {
           if (!this.modalContext.setterFlag) this.onEditFlag(stuff)
-          else this.onEditFlagFromScene(stuff)
+          else {
+            if (stuff.scene) this.onEditFlagFromScene(stuff)
+            else this.onEditFlagFromSection(stuff)
+          }
         }
         else {
           if (!this.modalContext.setterFlag) {
