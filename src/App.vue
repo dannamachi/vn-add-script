@@ -983,6 +983,7 @@ export default {
             value3
             if (value2[key3] == null) {
               if (key3 == 'meta__flagList') script[key2].meta__flagList = []
+              else if (key3 == 'meta__flagRList') script[key2].meta_flagRList = []
               else {
                 return false
               }
