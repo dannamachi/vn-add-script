@@ -197,7 +197,19 @@
     </div>
     <!-- section choice -->
     <div class="tab-pane container" id="contact" role="tabpanel" aria-labelledby="link-contact-tab">
-      choice - flags given from choice
+      <div class='mt-2 mb-2 row'>
+        <div class='col-3'>
+          (if no eligible option, choice is hidden)
+          edit prompt
+        </div>
+        <div class='col-3'>
+          options
+        </div>
+        <div class='col-4'>
+          editing option
+          name, required flags, giving flags
+        </div>
+      </div>
     </div>
   </div>
 
