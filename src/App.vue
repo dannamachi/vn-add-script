@@ -85,8 +85,9 @@
             select character to edit
           </button>
           <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonEChara">
-            <li v-for='(speaking2, index21) in getAllSprites(true)' :key='index21'>
-              <button type='button' class='dropdown-item' data-bs-toggle="modal" data-bs-target="#exampleModal" @click='updateModalContext({
+            <li v-for='(speaking2, index21) in getAllSprites(true)' :key='index21' class='dropdown-item'>
+              <button type='button' class='btn btn-link' @click='removeCharacter(speaking2)'>[x]</button>
+              <button type='button' class='btn btn-link' data-bs-toggle="modal" data-bs-target="#exampleModal" @click='updateModalContext({
                 scene: "",
                 line: "",
                 isEditing: true,
@@ -558,6 +559,9 @@ export default {
       } catch(e) {
         e
       }
+    },
+    removeCharacter(stuff) {
+      delete this.scriptObj['char__' + stuff.keyName]
     },
     removeFlag(stuff) {
       var found = -1;
