@@ -539,7 +539,15 @@ export default {
       'meta__flagGList': [],
 
       // prev link
-      'meta__previous' : ''
+      'meta__previous' : '',
+
+      // choice
+      'choice' : {
+        prompt: '',
+        options: [
+          // option: name, required flags, give flags
+        ]
+      }
     })
     return { scriptObj }
   },
@@ -898,6 +906,13 @@ export default {
       this.modalContext.success = ''
     },
 
+    matchObject(target, baseObj) {
+      for (const [key, value] of Object.entries(baseObj)) {
+        value
+        if (target[key] == null) return false
+      }
+      return true
+    },
     checkScript(script) {
       // TO DO: api version separate check
 
@@ -909,25 +924,41 @@ export default {
         name: '',
         type: ''
       }
+      var baseOption = {
+        name: '',
+        required: [],
+        giving: []
+      }
       if (script.meta__flagList) {
         for (var fl of script.meta__flagList) {
-          for (const [key8, value8] of Object.entries(baseFlag)) {
-            value8
-            if (fl[key8] == null) return false
-          }
+          if (!this.matchObject(fl, baseFlag)) return false
         }
       } else {
         script.meta__flagList = []
       }
       if (script.meta__flagGList) {
         for (var fl2 of script.meta__flagGList) {
-          for (const [key30, value30] of Object.entries(baseFlag)) {
-            value30
-            if (fl2[key30] == null) return false
-          }
+          if (!this.matchObject(fl2, baseFlag)) return false
         }
       } else {
         script.meta__flagGList = []
+      }
+      if (script.choice) {
+        if (!script.choice.prompt) return false
+        for (var opt of script.choice.options) {
+          if (!this.matchObject(opt, baseOption)) return false
+          for (var fl13 of opt.required) {
+            if (!this.matchObject(fl13, baseFlag)) return false
+          }
+          for (var fl14 of opt.giving) {
+            if (!this.matchObject(fl14, baseFlag)) return false
+          }
+        }
+      } else {
+        script.choice = {
+          prompt: '',
+          options: []
+        }
       }
 
       // section links meta (backward compat)
@@ -992,31 +1023,18 @@ export default {
           // line meta
           for (const [key4, value4] of Object.entries(value2)) {
             if (key4.startsWith('line__')) {
-              for (const [key5, value5] of Object.entries(baseLine)) {
-                value5
-                if (value4[key5] == null) return false
-              }
+              if (!this.matchObject(value4, baseLine)) return false
               // sprite meta
               for (const [key6, value6] of Object.entries(value4)) {
                 if (key6.startsWith('sprite__')) {
-                  for (const [key7, value7] of Object.entries(baseSprite)) {
-                    value7
-                    if (value6[key7] == null) {
-                      return false
-                    }
-                  }
+                  if (!this.matchObject(value6, baseSprite)) return false
                 }
               }
             }
           }
         // char meta
         } else if (key2.startsWith('char__') && key2 != 'char____narrator') {
-          for (const [key9, value9] of Object.entries(baseChar)) {
-            value9
-            if (value2[key9] == null) {
-              return false
-            }
-          }
+          if (!this.matchObject(value2, baseChar)) return false
         }
       }
 
