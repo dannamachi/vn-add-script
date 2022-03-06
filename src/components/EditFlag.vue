@@ -15,13 +15,13 @@
 
                 <button v-if="!context.setterFlag" class="nav-link" id="flag-diff-tab" data-bs-toggle="pill" data-bs-target="#flag-diff" type="button" role="tab" aria-controls="flag-diff" aria-selected="false">not value</button>
 
-                <button class="nav-link" id="flag-inc-tab" data-bs-toggle="pill" data-bs-target="#flag-inc" type="button" role="tab" aria-controls="flag-inc" aria-selected="false">increase score</button>
+                <button v-if="context.setterFlag" class="nav-link" id="flag-inc-tab" data-bs-toggle="pill" data-bs-target="#flag-inc" type="button" role="tab" aria-controls="flag-inc" aria-selected="false">increase score</button>
 
-                <button class="nav-link" id="flag-dec-tab" data-bs-toggle="pill" data-bs-target="#flag-dec" type="button" role="tab" aria-controls="flag-dec" aria-selected="false">decrease score</button>
+                <button v-if="context.setterFlag" class="nav-link" id="flag-dec-tab" data-bs-toggle="pill" data-bs-target="#flag-dec" type="button" role="tab" aria-controls="flag-dec" aria-selected="false">decrease score</button>
             </div>
         </div>
         <div class="tab-content col-sm-8" id="myTabContent">
-            <p class='mb-5'>Enter to add new {{ context.setterFlag ? 'setter' : 'condition' }}flag:</p>
+            <p class='mb-5'>Enter to add new {{ context.setterFlag ? 'setter' : 'condition' }} flag:</p>
             <div class="tab-pane show active" id="flag-flag" role="tabpanel" aria-labelledby="flag-flag-tab">
                 {{ context.setterFlag ? "give " : 'need '}}<input type="text" placeholder='flag name' v-model="flagName" maxlength="40" @keypress.enter.prevent="addExp('flag')"/>
             </div>
@@ -50,12 +50,12 @@
                 <p>does not have the value</p>
                 <p><input type="text" placeholder='flag value' v-model="flagValue" maxlength="40" @keypress.enter.prevent="addExp('diff')"/></p>
             </div>
-            <div class="tab-pane" id="flag-inc" role="tabpanel" aria-labelledby="flag-inc-tab">
+            <div v-if="context.setterFlag" class="tab-pane" id="flag-inc" role="tabpanel" aria-labelledby="flag-inc-tab">
                 <p><input type="text" placeholder='flag name' v-model="flagName" maxlength="40" @keypress.enter.prevent="addExp('inc')"/></p>
                 <p>increases by</p>
                 <p><input type="number" placeholder='increase value' v-model="flagScore" @keypress.enter.prevent="addExp('inc')"/></p>
             </div>
-            <div class="tab-pane" id="flag-dec" role="tabpanel" aria-labelledby="flag-dec-tab">
+            <div v-if="context.setterFlag" class="tab-pane" id="flag-dec" role="tabpanel" aria-labelledby="flag-dec-tab">
                 <p><input type="text" placeholder='flag name' v-model="flagName" maxlength="40" @keypress.enter.prevent="addExp('dec')"/></p>
                 <p>decreases by</p>
                 <p><input type="number" placeholder='decrease value' v-model="flagScore" @keypress.enter.prevent="addExp('dec')"/></p>

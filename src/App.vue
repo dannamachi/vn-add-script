@@ -523,7 +523,6 @@ export default {
   },
   methods: {
     isDuplicateFlag(fname, notThisName='') {
-      // note: backward compat
       // check list
       for (var pos of this.scriptObj.meta__flagList) {
         if (pos.name == fname) {
@@ -533,24 +532,24 @@ export default {
       }
 
       // check glist
-      for (var pos2 of this.scriptObj.meta__flagGList) {
-        if (pos2.name == fname) {
-          if (notThisName != '' && pos2.name == notThisName) continue
-          else return true
-        }
-      }
+      // for (var pos2 of this.scriptObj.meta__flagGList) {
+      //   if (pos2.name == fname) {
+      //     if (notThisName != '' && pos2.name == notThisName) continue
+      //     else return true
+      //   }
+      // }
 
       // check scene
-      for (const [key, value] of Object.entries(this.scriptObj)) {
-        if (key.startsWith('scene__')) {
-          for (var fl of value.meta__flagList) {
-            if (fl.name == fname) {
-              if (notThisName != '' && fl.name == notThisName) continue
-              else return true
-            }
-          }
-        }
-      }
+      // for (const [key, value] of Object.entries(this.scriptObj)) {
+      //   if (key.startsWith('scene__')) {
+      //     for (var fl of value.meta__flagList) {
+      //       if (fl.name == fname) {
+      //         if (notThisName != '' && fl.name == notThisName) continue
+      //         else return true
+      //       }
+      //     }
+      //   }
+      // }
       return false
     },
     async copySectionID() {
@@ -596,10 +595,10 @@ export default {
     onEditFlagFromSection(sstuff) {
       var stuff = sstuff.item
       var found = -1
-      if (this.isDuplicateFlag(stuff.name, stuff.oldName)) {
-        this.modalContext.success = 'no'
-        return;
-      }
+      // if (this.isDuplicateFlag(stuff.name, stuff.oldName)) {
+      //   this.modalContext.success = 'no'
+      //   return;
+      // }
       for (var i=0; i < this.scriptObj.meta__flagGList.length; i++) {
         // if (this.scriptObj.meta__flagList[i].name == stuff.name) {
         //   if (this.scriptObj.meta__flagList[i].name != stuff.oldName) {
@@ -626,10 +625,10 @@ export default {
     onEditFlagFromScene(sstuff) {
       var stuff = sstuff.item
       var found = -1
-      if (this.isDuplicateFlag(stuff.name, stuff.oldName)) {
-        this.modalContext.success = 'no'
-        return;
-      }
+      // if (this.isDuplicateFlag(stuff.name, stuff.oldName)) {
+      //   this.modalContext.success = 'no'
+      //   return;
+      // }
       for (var i=0; i < this.scriptObj['scene__' + sstuff.scene].meta__flagList.length; i++) {
         // if (this.scriptObj['scene__' + sstuff.scene].meta__flagList[i].name == stuff.name) {
         //   if (this.scriptObj['scene__' + sstuff.scene].meta__flagList[i].name != stuff.oldName) {
@@ -655,19 +654,19 @@ export default {
     },
     onAddFlagFromSection(sstuff) {
       var stuff = sstuff.item
-      if (this.isDuplicateFlag(stuff.name)) {
-        this.modalContext.success = 'no'
-        return;
-      }
+      // if (this.isDuplicateFlag(stuff.name)) {
+      //   this.modalContext.success = 'no'
+      //   return;
+      // }
       this.scriptObj.meta__flagGList.push(stuff);
       this.modalContext.success = 'yes'
     },
     onAddFlagFromScene(sstuff) {
       var stuff = sstuff.item
-      if (this.isDuplicateFlag(stuff.name)) {
-        this.modalContext.success = 'no'
-        return;
-      }
+      // if (this.isDuplicateFlag(stuff.name)) {
+      //   this.modalContext.success = 'no'
+      //   return;
+      // }
 
       this.scriptObj['scene__' + sstuff.scene].meta__flagList.push(stuff);
       this.modalContext.success = 'yes'
