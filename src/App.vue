@@ -583,6 +583,15 @@ export default {
       }
       this.scriptObj.meta__flagGList.splice(found,1)
     },
+    removeFlagFromScene(scene, stuff) {
+      var found = -1
+      for (var i=0; i < this.scriptObj['scene__' + scene].meta__flagList.length; i++) {
+        if (this.scriptObj['scene__' + scene].meta__flagList[i].name == stuff.name) {
+          found = i
+        }
+      }
+      this.scriptObj['scene__' + scene].meta__flagList.splice(found, 1)
+    },
 
     onEditFlagFromSection(sstuff) {
       var stuff = sstuff.item
@@ -1089,6 +1098,8 @@ export default {
       if (flag.type == 'more') return flag.name + ' > ' + flag.score
       if (flag.type == 'less') return flag.name + ' < ' + flag.score
       if (flag.type == 'diff') return flag.name + ' =/= ' + flag.value
+      if (flag.type == 'inc') return flag.name + ' + ' + flag.score
+      if (flag.type == 'dec') return flag.name + ' - ' + flag.score
       return 'invalid flag'
     },
     getAllSprites(noNar=false) {
