@@ -10,9 +10,9 @@
       </button>
       <div class="collapse navbar-collapse" id="navbarScroll">
         <ul class="navbar-nav me-auto my-2 my-lg-0 navbar-nav-scroll">
-          <!-- script info nav -->
+          <!-- section info and load nav -->
           <li class="nav-item mt-1">
-            <a class="nav-link" href="#scriptInfo">{{ scriptObj.meta__name }}</a>
+            <a class="nav-link" href="#scriptInfo">editing section</a>
           </li>
           <!-- scene list -->
           <li class="nav-item mt-1 dropdown">
@@ -38,110 +38,167 @@
     </div>
   </nav>
 
-  <!-- section info tab -->
+  <!-- global section stuff -->
   <ul class="nav nav-tabs" id="myTab" role="tablist">
     <li class="nav-item" role="presentation">
       <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">section info</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">load section</button>
+      <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">assets</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="link-section-tab" data-bs-toggle="tab" data-bs-target="#link-section" type="button" role="tab" aria-controls="link-section" aria-selected="false">link section</button>
+      <button class="nav-link" id="link-section-tab" data-bs-toggle="tab" data-bs-target="#link-section" type="button" role="tab" aria-controls="link-section" aria-selected="false">links</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">characters & flags</button>
+      <button class="nav-link" id="contact-tab" data-bs-toggle="tab" data-bs-target="#contact" type="button" role="tab" aria-controls="contact" aria-selected="false">choice</button>
     </li>
   </ul>
   <div class="tab-content" id="myTabContent">
-    <div class="tab-pane show active" id="home" role="tabpanel" aria-labelledby="home-tab">
-      <div class='pt-2 pb-2'>
+    <!-- section info -->
+    <div class="tab-pane show active container" id="home" role="tabpanel" aria-labelledby="home-tab">
+      <div class='pt-2 pb-2 row'>
+        <div class='col'>
         name: 
         <input class='mx-1' v-model='scriptObj.meta__name' /> 
         author: 
         <input class='mx-1' v-model='scriptObj.meta__author' />
-        preceding section:
-        <input class='mx-1' placeholder='another section id' v-model='scriptObj.meta__previous' />
+        </div>
+        <div class='col'>
+          <div v-if='errMsg != ""' class="alert alert-danger" role="alert">
+            {{ errMsg }}
+          </div>
+          <input name="text" placeholder="paste script text here..." v-model='inputJSON' />
+          <button class='mx-2 btn btn-dark' type='button' @click='loadScript()'>load section</button>
+        </div>
       <!-- <div>{{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)</div> -->
       </div>
     </div>
+    <!-- section assets -->
     <div class="tab-pane" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-      <div class='mt-2 mb-2'>
-      <div v-if='errMsg != ""' class="alert alert-danger" role="alert">
-        {{ errMsg }}
-      </div>
-      <input name="text" placeholder="paste script text here..." v-model='inputJSON' />
-      <button class='mx-2 btn btn-dark' type='button' @click='loadScript()'>load section</button>
-      </div>
-    </div>
-    <div class="tab-pane" id="contact" role="tabpanel" aria-labelledby="contact-tab">
-      <div class="mt-2 mb-2">
-        <button class="mx-2 btn btn-warning dropdown-toggle" type="button" id='dropdownMenuButtonEChara' data-bs-toggle="dropdown" aria-expanded="false">
-          select character to edit
-        </button>
-        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonEChara">
-          <li v-for='(speaking2, index21) in getAllSprites(true)' :key='index21'>
-            <button type='button' class='dropdown-item' data-bs-toggle="modal" data-bs-target="#exampleModal" @click='updateModalContext({
-              scene: "",
-              line: "",
-              isEditing: true,
-              second: "",
-              type: "character",
-              oldName: speaking2.name
-              })'>{{ speaking2.name }}</button>
-          </li>
-          <li class='dropdown-item'>
-            <button @click='updateModalContext({
-              scene: "",
-              line: "",
-              isEditing: false,
-              type: "character",
-              second: ""
-              })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-              add new character
-            </button>
-          </li>
-        </ul>
-        <button class="mx-2 btn btn-info dropdown-toggle" type="button" id='dropdownMenuButtonFlag' data-bs-toggle="dropdown" aria-expanded="false">
-          flags required by section
-        </button>
-        <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlag'>
-          <li class='dropdown-item' v-for='(flag, index22) in scriptObj.meta__flagList' :key='index22'>
-            <button type='button' class='btn btn-link' @click='removeFlag(flag)'>[x]</button>
-            <button class='btn btn-link' @click='updateModalContext({
-              scene: "",
-              line: "",
-              isEditing: true,
-              second: "",
-              type: "flag",
-              setterFlag: false,
-              old: flag
-              })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag) }}</button>
-          </li>
-          <li class='dropdown-item'>
-            <button @click='updateModalContext({
-              scene: "",
-              line: "",
-              isEditing: false,
-              type: "flag",
-              second: "",
-              setterFlag: false
-              })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-              add new flag
-            </button>
-          </li>
-        </ul>
+      <div class="row mt-2 mb-2">
+        <div class='col-6'>
+          import existing assets
+        </div>
+        <div class='col-6'>
+          <!-- edit chara -->
+          <button class="mx-2 btn btn-warning dropdown-toggle" type="button" id='dropdownMenuButtonEChara' data-bs-toggle="dropdown" aria-expanded="false">
+            select character to edit
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonEChara">
+            <li v-for='(speaking2, index21) in getAllSprites(true)' :key='index21'>
+              <button type='button' class='dropdown-item' data-bs-toggle="modal" data-bs-target="#exampleModal" @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: true,
+                second: "",
+                type: "character",
+                oldName: speaking2.name
+                })'>{{ speaking2.name }}</button>
+            </li>
+            <li class='dropdown-item'>
+              <button @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: false,
+                type: "character",
+                second: ""
+                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                add new character
+              </button>
+            </li>
+          </ul>
+          <!-- edit bg -->
+          <!-- edit ost -->
+          save current assets
+        </div>
       </div>
     </div>
+    <!-- section links -->
     <div class="tab-pane" id="link-section" role="tabpanel" aria-labelledby="link-section-tab">
-      <div class='mt-2 mb-2'>
-        to set another section to follow after this one,
-        <button type='button' @click='copySectionID()' class='btn btn-outline-primary btn-sm'>click here</button>
-        or copy below and paste under section info of the other section
+      <div class='row mt-2 mb-2'>
+        <!-- edit flags required -->
+        <div class='col-3 mt-2'>
+          <button class="mx-2 btn btn-info dropdown-toggle" type="button" id='dropdownMenuButtonFlag' data-bs-toggle="dropdown" aria-expanded="false">
+            flags required by section
+          </button>
+          <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlag'>
+            <li class='dropdown-item' v-for='(flag, index22) in scriptObj.meta__flagList' :key='index22'>
+              <button type='button' class='btn btn-link' @click='removeFlag(flag)'>[x]</button>
+              <button class='btn btn-link' @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: true,
+                second: "",
+                type: "flag",
+                setterFlag: false,
+                old: flag
+                })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag) }}</button>
+            </li>
+            <li class='dropdown-item'>
+              <button @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: false,
+                type: "flag",
+                second: "",
+                setterFlag: false
+                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                add new flag
+              </button>
+            </li>
+          </ul>
+        </div>
+        <!-- edit previous section -->
+        <div class='col-3'>
+          <p>previous section:</p>
+          <input class='mx-1' placeholder='another section id' v-model='scriptObj.meta__previous' />
+        </div>
+        <!-- edit flags given at the start of section -->
+        <div class='col-3'>
+          <button class="mx-2 mt-2 btn btn-info dropdown-toggle" type="button" id='dropdownMenuButtonFlagSet' data-bs-toggle="dropdown" aria-expanded="false">
+            flags given by section
+          </button>
+          <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlagSet'>
+            <li class='dropdown-item' v-for='(flag3, index31) in scriptObj.meta__flagGList' :key='index31'>
+              <button type='button' class='btn btn-link' @click='removeFlagFromSection(flag3)'>[x]</button>
+              <button class='btn btn-link' @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: true,
+                second: "",
+                type: "flag",
+                setterFlag: true,
+                old: flag3
+                })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag3, true) }}</button>
+            </li>
+            <li class='dropdown-item'>
+              <button @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: false,
+                type: "flag",
+                second: "",
+                setterFlag: true
+                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                add new flag
+              </button>
+            </li>
+          </ul>
+        </div>
+        <!-- edit next section -->
+        <div class='col-3'>
+          to set another section to follow after this one,
+          <button type='button' @click='copySectionID()' class='btn btn-outline-primary btn-sm'>click here</button>
+          <!-- or copy {{ scriptObj.meta__id }}  -->
+          and paste in previous section of the other section
+        </div>
       </div>
+    </div>
+    <!-- section choice -->
+    <div class="tab-pane container" id="contact" role="tabpanel" aria-labelledby="link-contact-tab">
+      choice - flags given from choice
     </div>
   </div>
-  <div class='bg-light text-muted'>section id: {{ scriptObj.meta__id }}</div>
 
   <!-- accordion for scene list -->
   <div class="accordion card" id="sceneList">
@@ -201,7 +258,7 @@
               </li>
             </ul>
 
-            <!-- flag section -->
+            <!-- flag per scene, for achievements -->
             <button class="mx-2 mt-2 btn btn-info dropdown-toggle" type="button" id='dropdownMenuButtonFlagSet' data-bs-toggle="dropdown" aria-expanded="false">
               flags given by scene
             </button>
@@ -435,6 +492,7 @@ export default {
 
       // flags
       'meta__flagList' : [],
+      'meta__flagGList': [],
 
       // prev link
       'meta__previous' : ''
@@ -464,12 +522,18 @@ export default {
   },
   methods: {
     isDuplicateFlag(fname, notThisName='') {
+      // note: backward compat
+      // check list
       for (var pos of this.scriptObj.meta__flagList) {
         if (pos.name == fname) {
           if (notThisName != '' && pos.name == notThisName) continue
           else return true
         }
       }
+
+      // check glist
+
+      // check scene
       for (const [key, value] of Object.entries(this.scriptObj)) {
         if (key.startsWith('scene__')) {
           for (var fl of value.meta__flagList) {
@@ -499,7 +563,16 @@ export default {
       }
       this.scriptObj.meta__flagList.splice(found,1)
     },
-
+    removeFlagFromSection(stuff) {
+      var found = -1;
+      for (var i=0; i<this.scriptObj.meta__flagGList.length; i++) {
+        if (this.scriptObj.meta__flagGList[i].name == stuff.name) {
+          found = i
+          break
+        }
+      }
+      this.scriptObj.meta__flagGList.splice(found,1)
+    },
     onEditFlagFromScene(sstuff) {
       var stuff = sstuff.item
       var found = -1
@@ -529,6 +602,15 @@ export default {
       this.scriptObj['scene__' + sstuff.scene].meta__flagList.push(stuff);
       this.modalContext.success = 'yes'
       this.modalContext.old = stuff
+    },
+    onAddFlagFromSection(sstuff) {
+      var stuff = sstuff.item
+      if (this.isDuplicateFlag(stuff.name)) {
+        this.modalContext.success = 'no'
+        return;
+      }
+      this.scriptObj.meta__flagGList.push(stuff);
+      this.modalContext.success = 'yes'
     },
     onAddFlagFromScene(sstuff) {
       var stuff = sstuff.item
@@ -593,8 +675,13 @@ export default {
           else this.onEditFlagFromScene(stuff)
         }
         else {
-          if (!this.modalContext.setterFlag) this.onAddFlag(stuff)
-          else this.onAddFlagFromScene(stuff)
+          if (!this.modalContext.setterFlag) {
+            this.onAddFlag(stuff)
+          }
+          else {
+            if (stuff.scene) this.onAddFlagFromScene(stuff)
+            else this.onAddFlagFromSection(stuff)
+          }
         }
       }
     },
@@ -664,11 +751,11 @@ export default {
       var charCount = 0;
 
       // flag meta (backward compat)
+      var baseFlag = {
+        name: '',
+        type: ''
+      }
       if (script.meta__flagList) {
-        var baseFlag = {
-          name: '',
-          type: ''
-        }
         for (var fl of script.meta__flagList) {
           for (const [key8, value8] of Object.entries(baseFlag)) {
             value8
@@ -678,6 +765,18 @@ export default {
       } else {
         script.meta__flagList = []
       }
+      if (script.meta__flagGList) {
+        for (var fl2 of script.meta__flagGList) {
+          for (const [key30, value30] of Object.entries(baseFlag)) {
+            value30
+            if (fl2[key30] == null) return false
+          }
+        }
+      } else {
+        script.meta__flagGList = []
+      }
+
+      // section links meta (backward compat)
       if (script.meta__previous == null) script.meta__previous = ''
       if (script.meta__id == null) script.meta__id = uuidv4()
 
