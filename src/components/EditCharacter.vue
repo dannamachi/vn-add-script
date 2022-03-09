@@ -5,17 +5,17 @@
             <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="exampleModalLabel">
-                    <div v-if='!context.isEditing'>New {{ context.type }} <span v-if='context.type =="flag"'> {{ context.setterFlag ? "that is being set" : "that is needed" }}</span></div>
-                    <div v-else>Edit {{ context.type }} <span v-if='context.type =="flag"'>{{ context.setterFlag ? "that is being set" : "that is needed" }}</span></div>
+                    <div v-if='!context.isEditing'>New {{ context.type }} <span v-if='context.type =="flag" || context.type == "optionFlag"'> {{ context.setterFlag ? "that is being set" : "that is needed" }}</span></div>
+                    <div v-else>Edit {{ context.type }} <span v-if='context.type =="flag" || context.type == "optionFlag"'>{{ context.setterFlag ? "that is being set" : "that is needed" }}</span></div>
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
                 <div v-if='!context.isEditing'>
-                    <p v-if='context.type != "flag"'>Enter to add new {{ context.type }}:</p>
+                    <p v-if='context.type != "flag" || context.type == "optionFlag"'>Enter to add new {{ context.type }}:</p>
 
                     <!-- comp to add new global stuff-->
-                    <EditFlag v-if='context.type == "flag"' v-bind:context="getEditContext()" @add-exp="onEditFlag" />
+                    <EditFlag v-if='context.type == "flag" || context.type == "optionFlag"' v-bind:context="getEditContext()" @add-exp="onEditFlag" />
                     <AddGlobalStuff v-else v-bind:stuffType='context.type' @add-exp='onAddSprite' />
 
                     <div v-if='context.success=="yes"' class="alert alert-success" role="alert">
@@ -26,7 +26,7 @@
                     </div>
                 </div>
                 <div v-else>
-                    <div v-if='context.type == "flag"'>
+                    <div v-if='context.type == "flag" || context.type == "optionFlag"'>
                         <EditFlag v-bind:context="getEditContext()" @add-exp="onEditFlag" />
                     </div>
                     <div v-else>
@@ -63,27 +63,19 @@ export default {
     },
     methods: {
         onEditFlag(stuff) {
-            if (!this.context.setterFlag) {
-                if (this.context.scene == '') this.$emit('addExp', { item: stuff})
-                else {
-                    this.$emit('addExp', {
-                        scene: this.context.scene,
-                        item: stuff
-                    })
-                }
+            if (this.context.scene != '') {
+                this.$emit('addExp', {
+                    scene: this.context.scene,
+                    item: stuff
+                })
+            } else if (this.context.type == 'optionFlag') {
+                this.$emit('addExp', {
+                    option: this.context.optionIndex,
+                    item: stuff
+                })
+            } else {
+                this.$emit('addExp', { item: stuff})
             }
-            else {
-                if (this.context.scene != '') {
-                    this.$emit('addExp', {
-                        scene: this.context.scene,
-                        item: stuff
-                    })
-                } else {
-                    this.$emit('addExp', {
-                        item: stuff
-                    })
-                }
-            } 
         },
         getEditContext() {
             var stuff = {

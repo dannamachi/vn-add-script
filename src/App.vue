@@ -200,12 +200,92 @@
       <div class='mt-2 mb-2 row'>
         <div class='col-3'>
           (if no eligible option, choice is hidden)
-          edit prompt
+          (conditional choice marked with *)
+          prompt:<input class='mx-2 mt-2' v-model='scriptObj.choice.prompt' /> 
         </div>
-        <div class='col-3'>
-          options
+        <div class='col-4 d-flex align-items-start'>
+          <!-- dynamic pills  -->
+          <div class="nav nav-pills flex-column" role="tablist" aria-orientation="vertical">
+            <button v-for='(opt2, index50) in scriptObj.choice.options' :key='index50' :class="{'nav-link': true, 'active': index50 == 0}" :id="index50.toString() + '-option-tab'" data-bs-toggle="pill" :data-bs-target="'#option-pane-' + index50.toString()" type="button" role="tab" :aria-controls="'option-pane-' + index50.toString()" aria-selected="true">
+              {{ opt2.name }} {{ opt2.required.length > 0 ? '*' : '' }}
+            </button>
+          </div>
         </div>
-        <div class='col-4'>
+        <div class='col-5 tab-content'>
+          <div v-for='(opt3, index51) in scriptObj.choice.options' :key='index51' :class="{
+            'tab-pane': true, 'show': index51 == 0, 'active': index51 == 0
+            }" :id="'option-pane-' + index51.toString()" role="tabpanel" :aria-labelledby="index51.toString() + '-option-tab'">
+            <button class='btn btn-link' type='button' @click='removeOption(index51)'>[x]</button>
+            option:
+            <input type="text" placeholder='write choice text here' v-model="scriptObj.choice.options[index51].name" maxlength="100" @keypress.enter.prevent />
+            
+            <!-- flags required by option -->
+            <button class="mx-2 mt-2 btn btn-info dropdown-toggle" type="button" :id='"dropdownMenuButtonOptionFlagSet" + index51.toString()' data-bs-toggle="dropdown" aria-expanded="false">
+              flags required by <option value=""></option>
+            </button>
+            <ul class="dropdown-menu" :aria-labelledby='"dropdownMenuButtonOptionFlagSet" + index51.toString()'>
+              <li class='dropdown-item' v-for='(flag6, index52) in opt3.required' :key='index52'>
+                <button type='button' class='btn btn-link' @click='removeFlagToOption(index51, flag6)'>[x]</button>
+                <button class='btn btn-link' @click='updateModalContext({
+                  scene: "",
+                  line: "",
+                  isEditing: true,
+                  second: "",
+                  type: "optionFlag",
+                  setterFlag: false,
+                  old: flag6,
+                  optionIndex: index51
+                  })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag6) }}</button>
+              </li>
+              <li class='dropdown-item'>
+                <button @click='updateModalContext({
+                  scene: "",
+                  line: "",
+                  isEditing: false,
+                  type: "optionFlag",
+                  second: "",
+                  setterFlag: false,
+                  optionIndex: index51
+                  })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                  add flag required by option
+                </button>
+              </li>
+            </ul>
+
+            <!-- flag given by option -->
+            <button class="mx-2 mt-2 btn btn-info dropdown-toggle" type="button" :id='"dropdownMenuButtonOptionGFlagSet" + index51.toString()' data-bs-toggle="dropdown" aria-expanded="false">
+              flags given by option
+            </button>
+            <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlagSet'>
+              <li class='dropdown-item' v-for='(flag7, index53) in opt3.giving' :key='index53'>
+                <button type='button' class='btn btn-link' @click='removeFlagFromOption(index51, flag7)'>[x]</button>
+                <button class='btn btn-link' @click='updateModalContext({
+                  scene: "",
+                  line: "",
+                  isEditing: true,
+                  second: "",
+                  type: "optionFlag",
+                  setterFlag: true,
+                  old: flag7,
+                  optionIndex: index51
+                  })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag7, true) }}</button>
+              </li>
+              <li class='dropdown-item'>
+                <button @click='updateModalContext({
+                  scene: "",
+                  line: "",
+                  isEditing: false,
+                  type: "optionFlag",
+                  second: "",
+                  setterFlag: true,
+                  optionIndex: index51
+                  })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                  add flag given by option
+                </button>
+              </li>
+            </ul>
+          </div>
+          <button class='btn btn-link' type='button' @click='addOption()'>new option</button>
           editing option
           name, required flags, giving flags
         </div>
@@ -286,7 +366,7 @@
                   type: "flag",
                   setterFlag: false,
                   old: flag4
-                  })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag4, true) }}</button>
+                  })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag4) }}</button>
               </li>
               <li class='dropdown-item'>
                 <button @click='updateModalContext({
@@ -660,7 +740,75 @@ export default {
       }
       this.scriptObj['scene__' + scene].meta__flagRList.splice(found, 1)
     },
+    removeFlagFromOption(optIn, flag) {
+      for (var i=0; i<this.scriptObj.choice.options[optIn].giving.length; i++) {
+        if (this.scriptObj.choice.options[optIn].giving[i].name == flag.name) {
+          this.scriptObj.choice.options[optIn].giving.splice(i, 1)
+          return
+        }
+      }
+    },
+    removeFlagToOption(optIn, flag) {
+      for (var i=0; i<this.scriptObj.choice.options[optIn].required.length; i++) {
+        if (this.scriptObj.choice.options[optIn].required[i].name == flag.name) {
+          this.scriptObj.choice.options[optIn].required.splice(i, 1)
+          return
+        }
+      }
+    },
+    addOption() {
+      this.scriptObj.choice.options.push({
+        name: 'another option',
+        required: [],
+        giving: []
+      })
+    },
+    removeOption(optIn) {
+      this.scriptObj.choice.options.splice(optIn, 1)
+    },
 
+    onAddFromOptionFlag(sstuff) {
+      for (var fl of this.scriptObj.choice.options[sstuff.option].giving) {
+        if (fl.name == sstuff.item.name) {
+          this.modalContext.success = 'no'
+          return
+        }
+      }
+      this.scriptObj.choice.options[sstuff.option].giving.push(sstuff.item)
+      this.modalContext.success = 'yes'
+    },
+    onAddToOptionFlag(sstuff) {
+      for (var fl of this.scriptObj.choice.options[sstuff.option].required) {
+        if (fl.name == sstuff.item.name) {
+          this.modalContext.success = 'no'
+          return
+        }
+      }
+      this.scriptObj.choice.options[sstuff.option].required.push(sstuff.item)
+      this.modalContext.success = 'yes'
+    },
+    onEditFromOptionFlag(sstuff) {
+      for (var i=0; i< this.scriptObj.choice.options[sstuff.option].giving.length; i++) {
+        if (this.scriptObj.choice.options[sstuff.option].giving[i].name == sstuff.item.name) {
+          this.scriptObj.choice.options[sstuff.option].giving.splice(i, 1, sstuff.item)
+          this.modalContext.success = 'yes'
+          this.modalContext.old = sstuff.item
+          return
+        }
+      }
+      this.modalContext.success = 'no'
+    },
+    onEditToOptionFlag(sstuff) {
+      for (var i=0; i< this.scriptObj.choice.options[sstuff.option].required.length; i++) {
+        if (this.scriptObj.choice.options[sstuff.option].required[i].name == sstuff.item.name) {
+          this.scriptObj.choice.options[sstuff.option].required.splice(i, 1, sstuff.item)
+          this.modalContext.success = 'yes'
+          this.modalContext.old = sstuff.item
+          return
+        }
+      }
+      this.modalContext.success = 'no'
+    },
     onEditFlagToScene(scene, stuff) {
       var found = -1
       if (this.isDuplicateFlagScene(scene, stuff.name, stuff.oldName)) {
@@ -844,6 +992,14 @@ export default {
             if (stuff.scene) this.onAddFlagFromScene(stuff)
             else this.onAddFlagFromSection(stuff)
           }
+        }
+      } else if (this.modalContext.type == 'optionFlag') {
+        if (this.modalContext.isEditing) {
+          if (this.modalContext.setterFlag) this.onEditFromOptionFlag(stuff)
+          else this.onEditToOptionFlag(stuff)
+        } else {
+          if (this.modalContext.setterFlag) this.onAddFromOptionFlag(stuff)
+          else this.onAddToOptionFlag(stuff)
         }
       }
     },
