@@ -12,7 +12,7 @@
             </div>
             <div class="modal-body">
                 <div v-if='!context.isEditing'>
-                    <p v-if='context.type != "flag" || context.type == "optionFlag"'>Enter to add new {{ context.type }}:</p>
+                    <p v-if='context.type != "flag" && context.type != "optionFlag"'>Enter to add new {{ context.type }}:</p>
 
                     <!-- comp to add new global stuff-->
                     <EditFlag v-if='context.type == "flag" || context.type == "optionFlag"' v-bind:context="getEditContext()" @add-exp="onEditFlag" />

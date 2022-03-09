@@ -199,95 +199,101 @@
     <div class="tab-pane container" id="contact" role="tabpanel" aria-labelledby="link-contact-tab">
       <div class='mt-2 mb-2 row'>
         <div class='col-3'>
-          (if no eligible option, choice is hidden)
-          (conditional choice marked with *)
-          prompt:<input class='mx-2 mt-2' v-model='scriptObj.choice.prompt' /> 
-        </div>
-        <div class='col-4 d-flex align-items-start'>
-          <!-- dynamic pills  -->
-          <div class="nav nav-pills flex-column" role="tablist" aria-orientation="vertical">
-            <button v-for='(opt2, index50) in scriptObj.choice.options' :key='index50' :class="{'nav-link': true, 'active': index50 == 0}" :id="index50.toString() + '-option-tab'" data-bs-toggle="pill" :data-bs-target="'#option-pane-' + index50.toString()" type="button" role="tab" :aria-controls="'option-pane-' + index50.toString()" aria-selected="true">
-              {{ opt2.name }} {{ opt2.required.length > 0 ? '*' : '' }}
-            </button>
+          <div>
+            choice is shown at the end with prompt:
+          </div>
+          <input v-model='scriptObj.choice.prompt' /> 
+          <div>
+            (conditional choice marked with *)
+          </div>
+          <div>
+            (if no eligible option, choice will be skipped)
           </div>
         </div>
+        <div class='col-4 d-flex nav nav-pills flex-column' role='tablist' aria-orientation='vertical'>
+          <!-- dynamic pills  -->
+          <button class='btn btn-link' type='button' @click='addOption(scriptObj.choice.options.length)'>+ new option</button>
+          <button v-for='(opt2, index50) in scriptObj.choice.options' :key='index50' :class="{'nav-link': true, 'active': index50 == 0}" :id="index50.toString() + '-option-tab'" data-bs-toggle="pill" :data-bs-target="'#option-pane-' + index50.toString()" type="button" role="tab" :aria-controls="'option-pane-' + index50.toString()" aria-selected="true">
+            {{ opt2.name }} {{ opt2.required.length > 0 ? '*' : '' }}
+          </button>
+        </div>
         <div class='col-5 tab-content'>
+          <div>editing option</div>
           <div v-for='(opt3, index51) in scriptObj.choice.options' :key='index51' :class="{
             'tab-pane': true, 'show': index51 == 0, 'active': index51 == 0
             }" :id="'option-pane-' + index51.toString()" role="tabpanel" :aria-labelledby="index51.toString() + '-option-tab'">
-            <button class='btn btn-link' type='button' @click='removeOption(index51)'>[x]</button>
-            option:
-            <input type="text" placeholder='write choice text here' v-model="scriptObj.choice.options[index51].name" maxlength="100" @keypress.enter.prevent />
+            option: 
+            <input type="text" placeholder='write choice text here' v-model="scriptObj.choice.options[index51].name" maxlength="40" @keypress.enter.prevent />
+            <button class='btn btn-link' type='button' @click='removeOption(index51)'>remove</button>
             
             <!-- flags required by option -->
-            <button class="mx-2 mt-2 btn btn-info dropdown-toggle" type="button" :id='"dropdownMenuButtonOptionFlagSet" + index51.toString()' data-bs-toggle="dropdown" aria-expanded="false">
-              flags required by <option value=""></option>
-            </button>
-            <ul class="dropdown-menu" :aria-labelledby='"dropdownMenuButtonOptionFlagSet" + index51.toString()'>
-              <li class='dropdown-item' v-for='(flag6, index52) in opt3.required' :key='index52'>
-                <button type='button' class='btn btn-link' @click='removeFlagToOption(index51, flag6)'>[x]</button>
-                <button class='btn btn-link' @click='updateModalContext({
-                  scene: "",
-                  line: "",
-                  isEditing: true,
-                  second: "",
-                  type: "optionFlag",
-                  setterFlag: false,
-                  old: flag6,
-                  optionIndex: index51
-                  })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag6) }}</button>
-              </li>
-              <li class='dropdown-item'>
-                <button @click='updateModalContext({
-                  scene: "",
-                  line: "",
-                  isEditing: false,
-                  type: "optionFlag",
-                  second: "",
-                  setterFlag: false,
-                  optionIndex: index51
-                  })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                  add flag required by option
-                </button>
-              </li>
-            </ul>
+            <div>
+              <button class="mx-2 mt-2 btn btn-info dropdown-toggle" type="button" :id='"dropdownMenuButtonOptionFlagSet" + index51.toString()' data-bs-toggle="dropdown" aria-expanded="false">
+                flags required by option
+              </button>
+              <ul class="dropdown-menu" :aria-labelledby='"dropdownMenuButtonOptionFlagSet" + index51.toString()'>
+                <li class='dropdown-item' v-for='(flag6, index52) in opt3.required' :key='index52'>
+                  <button type='button' class='btn btn-link' @click='removeFlagToOption(index51, flag6)'>[x]</button>
+                  <button class='btn btn-link' @click='updateModalContext({
+                    scene: "",
+                    line: "",
+                    isEditing: true,
+                    second: "",
+                    type: "optionFlag",
+                    setterFlag: false,
+                    old: flag6,
+                    optionIndex: index51
+                    })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag6) }}</button>
+                </li>
+                <li class='dropdown-item'>
+                  <button @click='updateModalContext({
+                    scene: "",
+                    line: "",
+                    isEditing: false,
+                    type: "optionFlag",
+                    second: "",
+                    setterFlag: false,
+                    optionIndex: index51
+                    })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    add flag required by option
+                  </button>
+                </li>
+              </ul>
 
-            <!-- flag given by option -->
-            <button class="mx-2 mt-2 btn btn-info dropdown-toggle" type="button" :id='"dropdownMenuButtonOptionGFlagSet" + index51.toString()' data-bs-toggle="dropdown" aria-expanded="false">
-              flags given by option
-            </button>
-            <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlagSet'>
-              <li class='dropdown-item' v-for='(flag7, index53) in opt3.giving' :key='index53'>
-                <button type='button' class='btn btn-link' @click='removeFlagFromOption(index51, flag7)'>[x]</button>
-                <button class='btn btn-link' @click='updateModalContext({
-                  scene: "",
-                  line: "",
-                  isEditing: true,
-                  second: "",
-                  type: "optionFlag",
-                  setterFlag: true,
-                  old: flag7,
-                  optionIndex: index51
-                  })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag7, true) }}</button>
-              </li>
-              <li class='dropdown-item'>
-                <button @click='updateModalContext({
-                  scene: "",
-                  line: "",
-                  isEditing: false,
-                  type: "optionFlag",
-                  second: "",
-                  setterFlag: true,
-                  optionIndex: index51
-                  })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                  add flag given by option
-                </button>
-              </li>
-            </ul>
+              <!-- flag given by option -->
+              <button class="mx-2 mt-2 btn btn-info dropdown-toggle" type="button" :id='"dropdownMenuButtonOptionGFlagSet" + index51.toString()' data-bs-toggle="dropdown" aria-expanded="false">
+                flags given by option
+              </button>
+              <ul class="dropdown-menu" aria-labelledby='dropdownMenuButtonFlagSet'>
+                <li class='dropdown-item' v-for='(flag7, index53) in opt3.giving' :key='index53'>
+                  <button type='button' class='btn btn-link' @click='removeFlagFromOption(index51, flag7)'>[x]</button>
+                  <button class='btn btn-link' @click='updateModalContext({
+                    scene: "",
+                    line: "",
+                    isEditing: true,
+                    second: "",
+                    type: "optionFlag",
+                    setterFlag: true,
+                    old: flag7,
+                    optionIndex: index51
+                    })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ getFlagDisplay(flag7, true) }}</button>
+                </li>
+                <li class='dropdown-item'>
+                  <button @click='updateModalContext({
+                    scene: "",
+                    line: "",
+                    isEditing: false,
+                    type: "optionFlag",
+                    second: "",
+                    setterFlag: true,
+                    optionIndex: index51
+                    })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                    add flag given by option
+                  </button>
+                </li>
+              </ul>
+            </div>
           </div>
-          <button class='btn btn-link' type='button' @click='addOption()'>new option</button>
-          editing option
-          name, required flags, giving flags
         </div>
       </div>
     </div>
@@ -756,9 +762,9 @@ export default {
         }
       }
     },
-    addOption() {
+    addOption(num) {
       this.scriptObj.choice.options.push({
-        name: 'another option',
+        name: 'another option ' + num.toString(),
         required: [],
         giving: []
       })
