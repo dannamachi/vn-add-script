@@ -659,7 +659,26 @@ export default {
     this.addNewScene()
   },
   methods: {
-    isDuplicateFlagScene(scene, fname, notThisName='') {
+    isDuplicateFromFlagScene(scene, fname, notThisName='') {
+      for (var pos of this.scriptObj['scene__' + scene].meta__flagList) {
+        if (pos.name == fname) {
+          if (notThisName != '' && pos.name == notThisName) continue
+          else return true
+        }
+      }
+      return false
+    },
+    isDuplicateFromFlag(fname, notThisName='') {
+      // check glist
+      for (var pos2 of this.scriptObj.meta__flagGList) {
+        if (pos2.name == fname) {
+          if (notThisName != '' && pos2.name == notThisName) continue
+          else return true
+        }
+      }
+      return false
+    },
+    isDuplicateToFlagScene(scene, fname, notThisName='') {
       for (var pos of this.scriptObj['scene__' + scene].meta__flagRList) {
         if (pos.name == fname) {
           if (notThisName != '' && pos.name == notThisName) continue
@@ -668,7 +687,7 @@ export default {
       }
       return false
     },
-    isDuplicateFlag(fname, notThisName='') {
+    isDuplicateToFlag(fname, notThisName='') {
       // check list
       for (var pos of this.scriptObj.meta__flagList) {
         if (pos.name == fname) {
@@ -817,7 +836,7 @@ export default {
     },
     onEditFlagToScene(scene, stuff) {
       var found = -1
-      if (this.isDuplicateFlagScene(scene, stuff.name, stuff.oldName)) {
+      if (this.isDuplicateToFlagScene(scene, stuff.name, stuff.oldName)) {
         this.modalContext.success = 'no'
         return;
       }
@@ -847,10 +866,10 @@ export default {
     onEditFlagFromSection(sstuff) {
       var stuff = sstuff.item
       var found = -1
-      // if (this.isDuplicateFlag(stuff.name, stuff.oldName)) {
-      //   this.modalContext.success = 'no'
-      //   return;
-      // }
+      if (this.isDuplicateFromFlag(stuff.name, stuff.oldName)) {
+        this.modalContext.success = 'no'
+        return;
+      }
       for (var i=0; i < this.scriptObj.meta__flagGList.length; i++) {
         // if (this.scriptObj.meta__flagList[i].name == stuff.name) {
         //   if (this.scriptObj.meta__flagList[i].name != stuff.oldName) {
@@ -877,10 +896,10 @@ export default {
     onEditFlagFromScene(sstuff) {
       var stuff = sstuff.item
       var found = -1
-      // if (this.isDuplicateFlag(stuff.name, stuff.oldName)) {
-      //   this.modalContext.success = 'no'
-      //   return;
-      // }
+      if (this.isDuplicateFromFlagScene(sstuff.scene, stuff.name, stuff.oldName)) {
+        this.modalContext.success = 'no'
+        return;
+      }
       for (var i=0; i < this.scriptObj['scene__' + sstuff.scene].meta__flagList.length; i++) {
         // if (this.scriptObj['scene__' + sstuff.scene].meta__flagList[i].name == stuff.name) {
         //   if (this.scriptObj['scene__' + sstuff.scene].meta__flagList[i].name != stuff.oldName) {
@@ -905,7 +924,7 @@ export default {
       this.modalContext.old = stuff
     },
     onAddFlagToScene(scene, stuff) {
-      if (this.isDuplicateFlagScene(scene, stuff.name)) {
+      if (this.isDuplicateToFlagScene(scene, stuff.name)) {
         this.modalContext.success = 'no'
         return;
       }
@@ -914,25 +933,25 @@ export default {
     },
     onAddFlagFromSection(sstuff) {
       var stuff = sstuff.item
-      // if (this.isDuplicateFlag(stuff.name)) {
-      //   this.modalContext.success = 'no'
-      //   return;
-      // }
+      if (this.isDuplicateFromFlag(stuff.name)) {
+        this.modalContext.success = 'no'
+        return;
+      }
       this.scriptObj.meta__flagGList.push(stuff);
       this.modalContext.success = 'yes'
     },
     onAddFlagFromScene(sstuff) {
       var stuff = sstuff.item
-      // if (this.isDuplicateFlag(stuff.name)) {
-      //   this.modalContext.success = 'no'
-      //   return;
-      // }
+      if (this.isDuplicateFromFlagScene(sstuff.scene, stuff.name)) {
+        this.modalContext.success = 'no'
+        return;
+      }
 
       this.scriptObj['scene__' + sstuff.scene].meta__flagList.push(stuff);
       this.modalContext.success = 'yes'
     },
     onAddFlag(stuff) {
-      if (this.isDuplicateFlag(stuff.name)) {
+      if (this.isDuplicateToFlag(stuff.name)) {
         this.modalContext.success = 'no'
         return;
       }
@@ -941,7 +960,7 @@ export default {
     },
     onEditFlag(stuff) {
       var found = -1
-      if (this.isDuplicateFlag(stuff.name, stuff.oldName)) {
+      if (this.isDuplicateToFlag(stuff.name, stuff.oldName)) {
         this.modalContext.success = 'no'
         return;
       }
