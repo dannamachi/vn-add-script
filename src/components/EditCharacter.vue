@@ -18,10 +18,13 @@
                     <EditFlag v-if='context.type == "flag" || context.type == "optionFlag"' v-bind:context="getEditContext()" @add-exp="onEditFlag" />
                     <div v-else-if="context.type == 'nickable'">
                         <p>
-                            name: <input type="text" placeholder='no space!' v-model="nickName" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
+                            name: <input type="text" v-model="nName" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
                         </p>
                         <p>
-                            pronoun: <input type="text" placeholder='pronoun here' v-model="nickPronoun" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
+                            default nickname: <input type="text" v-model="nNick" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
+                        </p>
+                        <p>
+                            default pronoun: <input type="text" v-model="nPronoun" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
                         </p>
                     </div>
                     <AddGlobalStuff v-else v-bind:stuffType='context.type' @add-exp='onAddSprite' />
@@ -38,12 +41,15 @@
                         <EditFlag v-bind:context="getEditContext()" @add-exp="onEditFlag" />
                     </div>
                     <div v-else-if='context.type == "nickable"'>
-                        <p>Enter to change nickable from name '{{ this.context.old.name }}' and pronoun '{{ this.context.old.pronoun }}':</p>
+                        <p>Enter to change nickable from name '{{ this.context.old.name }}', nickname {{ this.context.old.defaultNick }} and pronoun '{{ this.context.old.defaultPronoun }}':</p>
                         <p>
-                            name: <input type="text" placeholder='no space!' v-model="nickName" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
+                            name: <input type="text" v-model="nName" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
                         </p>
                         <p>
-                            pronoun: <input type="text" placeholder='pronoun here' v-model="nickPronoun" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
+                            default nickname: <input type="text" v-model="nNick" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
+                        </p>
+                        <p>
+                            default pronoun: <input type="text" v-model="nPronoun" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
                         </p>
                     </div>
                     <div v-else>
@@ -76,19 +82,22 @@ export default {
     data() {
         return {
             nameValue: "",
-            nickName: "",
-            nickPronoun: ""
+            nName: '',
+            nNick: "",
+            nPronoun: ""
         }
     },
     methods: {
         onEditNickable() {
-            if (this.nickName != '' && this.nickPronoun != '') {
+            if (this.nName != '' && this.nPronoun != '' && this.nNick != '') {
                 this.$emit('addExp', {
-                    name: this.nickName,
-                    pronoun: this.nickPronoun
+                    nName: this.nName,
+                    nick: this.nNick,
+                    pronoun: this.nPronoun
                 })
-                this.nickName = ''
-                this.nickPronoun = ''
+                this.nName = ''
+                this.nNick = ''
+                this.nPronoun = ''
             }
         },
         onEditFlag(stuff) {

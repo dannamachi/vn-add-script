@@ -131,7 +131,7 @@
                 second: "",
                 type: "nickable",
                 old: nickable
-                })'>{{ speaking2.name }}</button>
+                })'>{{ nickable.name }}</button>
             </li>
             <li class='dropdown-item'>
               <button @click='updateModalContext({
@@ -594,8 +594,8 @@
                             insert nickname
                           </button>  
                           <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonNickname'+scene.keyName+line.keyName">
-                            <li v-for='(nick1, index60) in getAllNickables()' :key='index60'>
-                              <button type='button' class='dropdown-item' @click='insertNickname(scene.keyName, line.keyName, nick1)'>{{ nick1.name }} (default:{{ nick1.defaultName }})</button>
+                            <li v-for='(nick1, index60) in scriptObj.nicks' :key='index60'>
+                              <button type='button' class='dropdown-item' @click='insertNickname(scene.keyName, line.keyName, nick1)'>{{ nick1.name }} ({{ nick1.nick }}))</button>
                             </li>
                             <li>
                               edit nicknames under nickables
@@ -607,8 +607,8 @@
                             insert pronoun
                           </button>  
                           <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonPronoun'+scene.keyName+line.keyName">
-                            <li v-for='(nick2, index61) in getAllNickables()' :key='index61'>
-                              <button type='button' class='dropdown-item' @click='insertPronoun(scene.keyName, line.keyName, nick2)'>{{ nick2.name }} (default:{{ nick2.defaultPronoun }})</button>
+                            <li v-for='(nick2, index61) in scriptObj.nicks' :key='index61'>
+                              <button type='button' class='dropdown-item' @click='insertPronoun(scene.keyName, line.keyName, nick2)'>{{ nick2.name }} ({{ nick2.pronoun }})</button>
                             </li>
                             <li>
                               edit pronouns under nickables
@@ -722,15 +722,23 @@ export default {
     this.addNewScene()
   },
   methods: {
+    insertNickname(scene, line, nick) {
+      this.scriptObj['scene__' + scene]['line__' + line].text += "{@" + nick.name + "@}"
+    },
+    insertPronoun(scene, line, nick) {
+      this.scriptObj['scene__' + scene]['line__' + line].text += "{!" + nick.name + "!}"
+    },
     addNickable(stuff) {
-      if (this.isNickDuplicate(stuff.name)) {
+      if (this.isNickDuplicate(stuff.nName)) {
         this.modalContext.success = 'no'
         return
       }
       this.scriptObj.nicks.push({
-        name: stuff.name,
+        name: stuff.nName,
+        nick: stuff.nick,
+        defaultNick: stuff.nick,
         pronoun: stuff.pronoun,
-        default: stuff.name
+        defaultPronoun: stuff.pronoun
       })
       this.modalContext.success = 'yes'
     },
@@ -745,20 +753,22 @@ export default {
     },
     updateNickable(stuff) {
       // check old match
-      if (this.isNickDuplicate(stuff.name, this.context.old.name)) {
+      if (this.isNickDuplicate(stuff.nName, this.modalContext.old.name)) {
         this.modalContext.success = 'no'
         return
       }
       // splice
       var newNick = {
-        name: stuff.name,
+        name: stuff.nName,
+        nick: stuff.nick,
+        defaultNick: stuff.nick,
         pronoun: stuff.pronoun,
-        default: stuff.name
+        defaultPronoun: stuff.pronoun
       }
       for (var i=0; i<this.scriptObj.nicks.length; i++) {
         if (this.scriptObj.nicks[i].name == this.modalContext.old.name) {
           this.scriptObj.nicks.splice(i, 1, newNick)
-          return
+          break
         }
       }
       // update script
@@ -766,7 +776,8 @@ export default {
         if (key.startsWith('scene__')) {
           for (const [key1, value1] of Object.entries(value)) {
             if (key1.startsWith('line__')) {
-              this.scriptObj[key][key1].text = this.parseAndReplace(value1.text, this.context.old, newNick)
+              this.scriptObj[key][key1].text = this.parseAndReplace(value1.text, this.modalContext.old, newNick)
+              this.scriptObj[key][key1].text = this.parseAndReplace(value1.text, this.modalContext.old, newNick, 'p')
             }
           }
         }
@@ -774,26 +785,40 @@ export default {
       this.modalContext.success = 'yes'
       this.modalContext.old = newNick
     },
-    parseAndReplace(line, oldNick, newNick) {
-      var position1 = line.search("{@");
+    parseAndReplace(line, oldNick, newNick, type='n') {
+      var startSym = '{@'
+      var endSym = '@}'
+      if (type == 'p') {
+        startSym = '{!'
+        endSym = '!}'
+      }
+      var position1 = line.search(startSym);
       var position2 = -1
-      if (position1 != -1) position2 = line.substring(position1).search("@}")
+      if (position1 != -1) position2 = line.substring(position1).search(endSym)
       if (position1 == -1 || position2 == -1) return line
 
-      var text = line.substring(position1 + position2 + 2)
+      var text = line
       var nick
       var newLine = ''
       var someCond = true
       while (someCond) {
         nick = text.substring(position1 + 2, position1 + position2)
         if (nick == oldNick.name) {
-          newLine += text.substring(0, position1) + "{@" + newNick.name + "}@" + text.substring(position1 + position2 + 2)
+          newLine += text.substring(0, position1) + startSym + newNick.name + endSym
+        } else {
+          newLine += text.substring(0, position1 + position2 + 2)
         }
+        // console.log('text:' + text)
+        // console.log('newline:' + newLine)
         text = text.substring(position1 + position2 + 2)
-        position1 = text.search("{@");
-        if (position1 != -1) position2 = text.substring(position1).search("@}")
-        if (position1 == -1 || position2 == -1) someCond = false
+        position1 = text.search(startSym);
+        if (position1 != -1) position2 = text.substring(position1).search(endSym)
+        if (position1 == -1 || position2 == -1) {
+          newLine += text
+          someCond = false
+        }
       }
+      // console.log(newLine)
       return newLine
     },
     removeNickable(nick) {
@@ -1265,7 +1290,9 @@ export default {
       var baseNick = {
         name: '',
         pronoun: '',
-        default: ''
+        defaultPronoun: '',
+        nick: '',
+        defaultNick: ''
       }
       if (script.meta__flagList) {
         for (var fl of script.meta__flagList) {
