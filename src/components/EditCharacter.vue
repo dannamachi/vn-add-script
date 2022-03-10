@@ -52,9 +52,13 @@
                             default pronoun: <input type="text" v-model="nPronoun" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
                         </p>
                     </div>
+                    <div v-else-if='context.type == "background" || context.type == "music"'>
+                        <p>Enter to change from '{{ this.context.oldName }}':</p>
+                        <input type="text" v-model="nameValue" maxlength="40" @keypress.enter.prevent="onEditAsset()"/>
+                    </div>
                     <div v-else>
                         <p>Enter to change from '{{ this.context.oldName }}':</p>
-                        <input type="text" v-model="nameValue" maxlength="40" @keypress.enter.prevent="onAddSprite(null)"/>
+                        <input type="text" v-model="nameValue" maxlength="40" @keypress.enter.prevent="onEditAsset()"/>
                     </div>
                     <div v-if='context.success=="yes"' class="alert alert-success" role="alert">
                         {{ context.type}} updated !
@@ -127,6 +131,13 @@ export default {
                 if (this.context.old.type == 'value' || this.context.old.type == 'diff') stuff.oldValue = this.context.old.value
             }
             return stuff
+        },
+        onEditAsset() {
+            if (this.context.oldName == this.nameValue) return;
+            this.$emit('editAsset', {
+                oldName: this.context.oldName,
+                newName: this.nameValue
+            })
         },
         onAddSprite(stuff) {
             if (this.context.isEditing) {

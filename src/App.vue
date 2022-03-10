@@ -153,8 +153,15 @@
             select background to edit
           </button>                    
           <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonBGAll">
-            <li v-for='(bg2, index200) in scriptObj.meta__bgList' :key='index200'>
-              <button type='button' class='dropdown-item'>{{ bg2 }}</button>
+            <li v-for='(bg2, index200) in getEditableBGs()' :key='index200'>
+              <button type='button' class='dropdown-item' @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: true,
+                second: "",
+                type: "background",
+                oldName: bg2
+                })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ bg2 }}</button>
             </li>
             <li class='dropdown-item'>
               <button @click='updateModalContext({
@@ -174,8 +181,15 @@
             select music to edit
           </button>                
           <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonOSTAll">
-            <li v-for='(ost2, index201) in scriptObj.meta__ostList' :key='index201'>
-              <button type='button' class='dropdown-item'>{{ ost2 }}</button>
+            <li v-for='(ost2, index201) in getEditableOSTs()' :key='index201'>
+              <button type='button' class='dropdown-item' @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: true,
+                second: "",
+                type: "music",
+                oldName: ost2
+                })' data-bs-toggle="modal" data-bs-target="#exampleModal">{{ ost2 }}</button>
             </li>
             <li class='dropdown-item'>
               <button @click='updateModalContext({
@@ -690,7 +704,7 @@
   </div>
 
   <!-- modal to edit character -->
-  <EditCharacter v-bind:context='modalContext' @add-exp='onModalProcess' @edit-chara='onEditChara' />
+  <EditCharacter v-bind:context='modalContext' @add-exp='onModalProcess' @edit-chara='onEditChara' @edit-asset='onEditAsset' />
 
 </template>
 
@@ -778,6 +792,20 @@ export default {
     },
     loadAsset() {
 
+    },
+    getEditableBGs() {
+      var bgs = []
+      for (var bg of this.scriptObj.meta__bgList) {
+        if (bg != 'none') bgs.push(bg)
+      }
+      return bgs
+    },
+    getEditableOSTs() {
+      var osts = []
+      for (var ost of this.scriptObj.meta__ostList) {
+        if (ost != 'none') osts.push(ost)
+      }
+      return osts
     },
 
     matchObject(target, baseObj) {
@@ -1488,6 +1516,43 @@ export default {
       }
       this.modalContext.success = 'yes'
       this.modalContext.oldName = stuff.newName
+    },
+    onEditAsset(stuff) {
+      if (stuff.newName == 'none') {
+        this.modalContext.success = 'no'
+        return
+      }
+      var listName = ''
+      var typekey = ''
+      if (this.modalContext.type == 'music') {
+        listName = 'meta__ostList'
+        typekey = 'ost'
+      }
+      else if (this.modalContext.type == 'background') {
+        listName = 'meta__bgList'
+        typekey = 'background'
+      } else {
+        this.modalContext.success = 'no'
+        return
+      }
+
+      // splice
+      for (var i=0; i<this.scriptObj[listName].length; i++) {
+        if (this.scriptObj[listName][i] == stuff.oldName) {
+          this.scriptObj[listName].splice(i, 1, stuff.newName)
+        }
+      }
+
+      // update
+      for (const [key, value] of Object.entries(this.scriptObj)) {
+        if (key.startsWith('scene__')) {
+          if (value[typekey] == stuff.oldName) this.scriptObj[key][typekey] = stuff.newName
+        }
+      }
+
+      this.modalContext.success = 'yes'
+      this.modalContext.oldName = stuff.newName
+
     },
 
     updateModalContext(newUpdate) {
