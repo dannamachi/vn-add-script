@@ -16,6 +16,14 @@
 
                     <!-- comp to add new global stuff-->
                     <EditFlag v-if='context.type == "flag" || context.type == "optionFlag"' v-bind:context="getEditContext()" @add-exp="onEditFlag" />
+                    <div v-else-if="context.type == 'nickable'">
+                        <p>
+                            name: <input type="text" placeholder='no space!' v-model="nickName" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
+                        </p>
+                        <p>
+                            pronoun: <input type="text" placeholder='pronoun here' v-model="nickPronoun" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
+                        </p>
+                    </div>
                     <AddGlobalStuff v-else v-bind:stuffType='context.type' @add-exp='onAddSprite' />
 
                     <div v-if='context.success=="yes"' class="alert alert-success" role="alert">
@@ -28,6 +36,15 @@
                 <div v-else>
                     <div v-if='context.type == "flag" || context.type == "optionFlag"'>
                         <EditFlag v-bind:context="getEditContext()" @add-exp="onEditFlag" />
+                    </div>
+                    <div v-else-if='context.type == "nickable"'>
+                        <p>Enter to change nickable from name '{{ this.context.old.name }}' and pronoun '{{ this.context.old.pronoun }}':</p>
+                        <p>
+                            name: <input type="text" placeholder='no space!' v-model="nickName" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
+                        </p>
+                        <p>
+                            pronoun: <input type="text" placeholder='pronoun here' v-model="nickPronoun" maxlength="40" @keypress.enter.prevent="onEditNickable()"/>
+                        </p>
                     </div>
                     <div v-else>
                         <p>Enter to change from '{{ this.context.oldName }}':</p>
@@ -58,10 +75,22 @@ export default {
     },
     data() {
         return {
-            nameValue: ""
+            nameValue: "",
+            nickName: "",
+            nickPronoun: ""
         }
     },
     methods: {
+        onEditNickable() {
+            if (this.nickName != '' && this.nickPronoun != '') {
+                this.$emit('addExp', {
+                    name: this.nickName,
+                    pronoun: this.nickPronoun
+                })
+                this.nickName = ''
+                this.nickPronoun = ''
+            }
+        },
         onEditFlag(stuff) {
             if (this.context.scene != '') {
                 this.$emit('addExp', {

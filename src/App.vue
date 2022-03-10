@@ -44,7 +44,7 @@
       <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">section info</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">assets</button>
+      <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">nickables</button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="link-section-tab" data-bs-toggle="tab" data-bs-target="#link-section" type="button" role="tab" aria-controls="link-section" aria-selected="false">links</button>
@@ -54,32 +54,30 @@
     </li>
   </ul>
   <div class="tab-content" id="myTabContent">
-    <!-- section info -->
+    <!-- section info & assets -->
     <div class="tab-pane show active container" id="home" role="tabpanel" aria-labelledby="home-tab">
       <div class='pt-2 pb-2 row'>
-        <div class='col'>
-        name: 
-        <input class='mx-1' v-model='scriptObj.meta__name' /> 
-        author: 
-        <input class='mx-1' v-model='scriptObj.meta__author' />
+        <div class='col-3'>
+          <div>
+            name: 
+            <input class='mx-1' v-model='scriptObj.meta__name' /> 
+          </div>
+          <div>
+            author: 
+            <input class='mx-1' v-model='scriptObj.meta__author' />
+          </div>
         </div>
-        <div class='col'>
+        <div class='col-3'>
           <div v-if='errMsg != ""' class="alert alert-danger" role="alert">
             {{ errMsg }}
           </div>
           <input name="text" placeholder="paste script text here..." v-model='inputJSON' />
           <button class='mx-2 btn btn-dark' type='button' @click='loadScript()'>load section</button>
         </div>
-      <!-- <div>{{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)</div> -->
-      </div>
-    </div>
-    <!-- section assets -->
-    <div class="tab-pane" id="profile" role="tabpanel" aria-labelledby="profile-tab">
-      <div class="row mt-2 mb-2">
-        <div class='col-6'>
+        <div class='col-3'>
           import existing assets
         </div>
-        <div class='col-6'>
+        <div class='col-3'>
           <!-- edit chara -->
           <button class="mx-2 btn btn-warning dropdown-toggle" type="button" id='dropdownMenuButtonEChara' data-bs-toggle="dropdown" aria-expanded="false">
             select character to edit
@@ -112,6 +110,41 @@
           <!-- edit ost -->
           save current assets
         </div>
+      <!-- <div>{{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)</div> -->
+      </div>
+    </div>
+    <!-- section nickables -->
+    <div class="tab-pane" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+      <div class="row mt-2 mb-2">
+        <!-- edit nickable -->
+          <button class="mx-2 btn btn-warning dropdown-toggle" type="button" id='dropdownMenuButtonENick' data-bs-toggle="dropdown" aria-expanded="false">
+            select nickable to edit
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonENick">
+            <li v-for='(nickable, index100) in scriptObj.nicks' :key='index100' class='dropdown-item'>
+              <button type='button' class='btn btn-link' @click='removeNickable(nickable)'>[x]</button>
+              <!-- TO DO: nickable modal & methods -->
+              <button type='button' class='btn btn-link' data-bs-toggle="modal" data-bs-target="#exampleModal" @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: true,
+                second: "",
+                type: "nickable",
+                old: nickable
+                })'>{{ speaking2.name }}</button>
+            </li>
+            <li class='dropdown-item'>
+              <button @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: false,
+                type: "nickable",
+                second: ""
+                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                add new nickable
+              </button>
+            </li>
+          </ul>
       </div>
     </div>
     <!-- section links -->
@@ -555,6 +588,33 @@
                               </button>
                             </li>
                           </ul>
+
+                          <!-- insert nicknames -->
+                          <button class="btn btn-warning dropdown-toggle" type="button" :id="'dropdownMenuButtonNickname'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                            insert nickname
+                          </button>  
+                          <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonNickname'+scene.keyName+line.keyName">
+                            <li v-for='(nick1, index60) in getAllNickables()' :key='index60'>
+                              <button type='button' class='dropdown-item' @click='insertNickname(scene.keyName, line.keyName, nick1)'>{{ nick1.name }} (default:{{ nick1.defaultName }})</button>
+                            </li>
+                            <li>
+                              edit nicknames under nickables
+                            </li>
+                          </ul>
+
+                          <!-- insert pronouns -->
+                          <button class="btn btn-warning dropdown-toggle" type="button" :id="'dropdownMenuButtonPronoun'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                            insert pronoun
+                          </button>  
+                          <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonPronoun'+scene.keyName+line.keyName">
+                            <li v-for='(nick2, index61) in getAllNickables()' :key='index61'>
+                              <button type='button' class='dropdown-item' @click='insertPronoun(scene.keyName, line.keyName, nick2)'>{{ nick2.name }} (default:{{ nick2.defaultPronoun }})</button>
+                            </li>
+                            <li>
+                              edit pronouns under nickables
+                            </li>
+                          </ul>
+
                         </div>
                       </div>
 
@@ -627,6 +687,9 @@ export default {
       // prev link
       'meta__previous' : '',
 
+      // nicknames (name, pronoun, default)
+      'nicks': [],
+
       // choice
       'choice' : {
         prompt: '',
@@ -659,6 +722,89 @@ export default {
     this.addNewScene()
   },
   methods: {
+    addNickable(stuff) {
+      if (this.isNickDuplicate(stuff.name)) {
+        this.modalContext.success = 'no'
+        return
+      }
+      this.scriptObj.nicks.push({
+        name: stuff.name,
+        pronoun: stuff.pronoun,
+        default: stuff.name
+      })
+      this.modalContext.success = 'yes'
+    },
+    isNickDuplicate(nck, notThisNick='') {
+      for (var nick of this.scriptObj.nicks) {
+        if (nick.name == nck) {
+          if (notThisNick != '' && nick.name == notThisNick) continue
+          else return true
+        }
+      }
+      return false
+    },
+    updateNickable(stuff) {
+      // check old match
+      if (this.isNickDuplicate(stuff.name, this.context.old.name)) {
+        this.modalContext.success = 'no'
+        return
+      }
+      // splice
+      var newNick = {
+        name: stuff.name,
+        pronoun: stuff.pronoun,
+        default: stuff.name
+      }
+      for (var i=0; i<this.scriptObj.nicks.length; i++) {
+        if (this.scriptObj.nicks[i].name == this.modalContext.old.name) {
+          this.scriptObj.nicks.splice(i, 1, newNick)
+          return
+        }
+      }
+      // update script
+      for (const [key, value] of Object.entries(this.scriptObj)) {
+        if (key.startsWith('scene__')) {
+          for (const [key1, value1] of Object.entries(value)) {
+            if (key1.startsWith('line__')) {
+              this.scriptObj[key][key1].text = this.parseAndReplace(value1.text, this.context.old, newNick)
+            }
+          }
+        }
+      }
+      this.modalContext.success = 'yes'
+      this.modalContext.old = newNick
+    },
+    parseAndReplace(line, oldNick, newNick) {
+      var position1 = line.search("{@");
+      var position2 = -1
+      if (position1 != -1) position2 = line.substring(position1).search("@}")
+      if (position1 == -1 || position2 == -1) return line
+
+      var text = line.substring(position1 + position2 + 2)
+      var nick
+      var newLine = ''
+      var someCond = true
+      while (someCond) {
+        nick = text.substring(position1 + 2, position1 + position2)
+        if (nick == oldNick.name) {
+          newLine += text.substring(0, position1) + "{@" + newNick.name + "}@" + text.substring(position1 + position2 + 2)
+        }
+        text = text.substring(position1 + position2 + 2)
+        position1 = text.search("{@");
+        if (position1 != -1) position2 = text.substring(position1).search("@}")
+        if (position1 == -1 || position2 == -1) someCond = false
+      }
+      return newLine
+    },
+    removeNickable(nick) {
+      for (var i=0; i<this.scriptObj.nicks.length; i++) {
+        if (this.scriptObj.nicks[i].name == nick.name) {
+          this.scriptObj.nicks.splice(i, 1)
+          return
+        }
+      }
+    },
+
     isDuplicateFromFlagScene(scene, fname, notThisName='') {
       for (var pos of this.scriptObj['scene__' + scene].meta__flagList) {
         if (pos.name == fname) {
@@ -1026,6 +1172,12 @@ export default {
           if (this.modalContext.setterFlag) this.onAddFromOptionFlag(stuff)
           else this.onAddToOptionFlag(stuff)
         }
+      } else if (this.modalContext.type == 'nickable') {
+        if (this.modalContext.isEditing) {
+          this.updateNickable(stuff)
+        } else {
+          this.addNickable(stuff)
+        }
       }
     },
     onEditChara(stuff) {
@@ -1110,6 +1262,11 @@ export default {
         required: [],
         giving: []
       }
+      var baseNick = {
+        name: '',
+        pronoun: '',
+        default: ''
+      }
       if (script.meta__flagList) {
         for (var fl of script.meta__flagList) {
           if (!this.matchObject(fl, baseFlag)) return false
@@ -1139,6 +1296,14 @@ export default {
         script.choice = {
           prompt: '',
           options: []
+        }
+      }
+
+      // nicks
+      if (!script.nicks) script.nicks = []
+      else {
+        for (var nick of script.nicks) {
+          if (!this.matchObject(nick, baseNick)) return false
         }
       }
 
