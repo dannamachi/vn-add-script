@@ -205,6 +205,7 @@
           </ul>
 
           <!-- save current assets -->
+          <button type='button' class='btn btn-success' @click='downloadAsset()'>download assets</button>
         </div>
       </div>
     </div>
@@ -787,11 +788,58 @@ export default {
     this.addNewScene()
   },
   methods: {
-    checkAsset() {
-
+    downloadAsset() {
+      var exportObj = {
+        meta__bgList: this.scriptObj.meta__bgList,
+        meta__ostList: this.scriptObj.meta__ostList,
+        meta__ccount: 0
+      }
+      for (const [key, value] of Object.entries(this.scriptObj)) {
+        if (key.startsWith('char__')) {
+          exportObj[key] = value
+          exportObj.meta__ccount += 1
+        }
+      }
+      require("downloadjs")(JSON.stringify(exportObj), "assets.json", "text/plain");
+    },
+    checkAsset(script) {
+      var baseChar = {
+        keyName: '',
+        name: '',
+        expList: []
+      }
+      var ccount = 0
+      if (!script.meta__bgList) script.meta__bgList = []
+      if (!script.meta__ostList) script.meta__ostList = []
+      for (const [key1, value1] of Object.entries(script)) {
+        if (key1.startsWith('char__')) {
+          if (!this.matchObject(value1, baseChar)) return false
+          ccount += 1
+        }
+      }
+      if (ccount != script.meta__ccount) return false
+      return true
     },
     loadAsset() {
-
+      try {
+        var script = JSON.parse(this.assetJSON)
+        if (!this.checkAsset(script)) return
+        else {
+          for (var bg of script.meta__bgList) {
+            if (!this.scriptObj.meta__bgList.includes(bg)) this.scriptObj.meta__bgList.push(bg)
+          }
+          for (var ost of script.meta__ostList) {
+            if (!this.scriptObj.meta__ostList.includes(ost)) this.scriptObj.meta__ostList.push(ost)
+          }
+          for (const [key, value] of Object.entries(script)) {
+            if (key.startsWith('char__')) this.scriptObj[key] = value
+          }
+          this.assetJSON = ''
+        }
+      }
+      catch(err) {
+        this.errMsg2 = 'invalid asset text !'
+      }
     },
     getEditableBGs() {
       var bgs = []
