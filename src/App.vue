@@ -44,7 +44,7 @@
       <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab" aria-controls="home" aria-selected="true">section info</button>
     </li>
     <li class="nav-item" role="presentation">
-      <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">nickables</button>
+      <button class="nav-link" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile" type="button" role="tab" aria-controls="profile" aria-selected="false">assets</button>
     </li>
     <li class="nav-item" role="presentation">
       <button class="nav-link" id="link-section-tab" data-bs-toggle="tab" data-bs-target="#link-section" type="button" role="tab" aria-controls="link-section" aria-selected="false">links</button>
@@ -57,7 +57,7 @@
     <!-- section info & assets -->
     <div class="tab-pane show active container" id="home" role="tabpanel" aria-labelledby="home-tab">
       <div class='pt-2 pb-2 row'>
-        <div class='col-3'>
+        <div class='col-6'>
           <div>
             name: 
             <input class='mx-1' v-model='scriptObj.meta__name' /> 
@@ -67,48 +67,12 @@
             <input class='mx-1' v-model='scriptObj.meta__author' />
           </div>
         </div>
-        <div class='col-3'>
+        <div class='col-6'>
           <div v-if='errMsg != ""' class="alert alert-danger" role="alert">
             {{ errMsg }}
           </div>
           <input name="text" placeholder="paste script text here..." v-model='inputJSON' />
           <button class='mx-2 btn btn-dark' type='button' @click='loadScript()'>load section</button>
-        </div>
-        <div class='col-3'>
-          import existing assets
-        </div>
-        <div class='col-3'>
-          <!-- edit chara -->
-          <button class="mx-2 btn btn-warning dropdown-toggle" type="button" id='dropdownMenuButtonEChara' data-bs-toggle="dropdown" aria-expanded="false">
-            select character to edit
-          </button>
-          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonEChara">
-            <li v-for='(speaking2, index21) in getAllSprites(true)' :key='index21' class='dropdown-item'>
-              <button type='button' class='btn btn-link' @click='removeCharacter(speaking2)'>[x]</button>
-              <button type='button' class='btn btn-link' data-bs-toggle="modal" data-bs-target="#exampleModal" @click='updateModalContext({
-                scene: "",
-                line: "",
-                isEditing: true,
-                second: "",
-                type: "character",
-                oldName: speaking2.name
-                })'>{{ speaking2.name }}</button>
-            </li>
-            <li class='dropdown-item'>
-              <button @click='updateModalContext({
-                scene: "",
-                line: "",
-                isEditing: false,
-                type: "character",
-                second: ""
-                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                add new character
-              </button>
-            </li>
-          </ul>
-          <!-- edit bg -->
-          <!-- edit ost -->
-          save current assets
         </div>
       <!-- <div>{{ scriptObj.meta__scount }} scene(s), {{ scriptObj.meta__ccount - 1 }} characters (excl. default narrator)</div> -->
       </div>
@@ -116,7 +80,16 @@
     <!-- section nickables -->
     <div class="tab-pane" id="profile" role="tabpanel" aria-labelledby="profile-tab">
       <div class="row mt-2 mb-2">
-        <!-- edit nickable -->
+        <div class='col-4'>
+          <div v-if='errMsg2 != ""' class="alert alert-danger" role="alert">
+            {{ errMsg2 }}
+          </div>
+          <input name="text" placeholder="paste asset text here..." v-model='assetJSON' />
+          <button class='mx-2 btn btn-dark' type='button' @click='loadAsset()'>load asset</button>
+        </div>
+        <!-- assets -->
+        <div class='col-8'>
+          <!-- edit nickable -->
           <button class="mx-2 btn btn-warning dropdown-toggle" type="button" id='dropdownMenuButtonENick' data-bs-toggle="dropdown" aria-expanded="false">
             select nickable to edit
           </button>
@@ -145,6 +118,80 @@
               </button>
             </li>
           </ul>
+
+          <!-- edit chara -->
+          <button class="mx-2 btn btn-warning dropdown-toggle" type="button" id='dropdownMenuButtonEChara' data-bs-toggle="dropdown" aria-expanded="false">
+            select character to edit
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonEChara">
+            <li v-for='(speaking2, index21) in getAllSprites(true)' :key='index21' class='dropdown-item'>
+              <button type='button' class='btn btn-link' @click='removeCharacter(speaking2)'>[x]</button>
+              <button type='button' class='btn btn-link' data-bs-toggle="modal" data-bs-target="#exampleModal" @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: true,
+                second: "",
+                type: "character",
+                oldName: speaking2.name
+                })'>{{ speaking2.name }}</button>
+            </li>
+            <li class='dropdown-item'>
+              <button @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: false,
+                type: "character",
+                second: ""
+                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                add new character
+              </button>
+            </li>
+          </ul>
+          
+          <!-- bg section -->
+          <button class="mx-2 mt-2 btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonBGAll" data-bs-toggle="dropdown" aria-expanded="false">
+            select background to edit
+          </button>                    
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonBGAll">
+            <li v-for='(bg2, index200) in scriptObj.meta__bgList' :key='index200'>
+              <button type='button' class='dropdown-item'>{{ bg2 }}</button>
+            </li>
+            <li class='dropdown-item'>
+              <button @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: false,
+                second: "",
+                type: "background"
+                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                add new background
+              </button>
+            </li>
+          </ul>
+
+          <!-- ost section  -->
+          <button class="mx-2 mt-2 btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonOSTAll" data-bs-toggle="dropdown" aria-expanded="false">
+            select music to edit
+          </button>                
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonOSTAll">
+            <li v-for='(ost2, index201) in scriptObj.meta__ostList' :key='index201'>
+              <button type='button' class='dropdown-item'>{{ ost2 }}</button>
+            </li>
+            <li class='dropdown-item'>
+              <button @click='updateModalContext({
+                scene: "",
+                line: "",
+                isEditing: false,
+                second: "",
+                type: "music"
+                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                add new music
+              </button>
+            </li>
+          </ul>
+
+          <!-- save current assets -->
+        </div>
       </div>
     </div>
     <!-- section links -->
@@ -589,37 +636,39 @@
                             </li>
                           </ul>
 
-                          <!-- insert nicknames -->
-                          <button class="btn btn-warning dropdown-toggle" type="button" :id="'dropdownMenuButtonNickname'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-                            insert nickname
-                          </button>  
-                          <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonNickname'+scene.keyName+line.keyName">
-                            <li v-for='(nick1, index60) in scriptObj.nicks' :key='index60'>
-                              <button type='button' class='dropdown-item' @click='insertNickname(scene.keyName, line.keyName, nick1)'>{{ nick1.name }} ({{ nick1.nick }}))</button>
-                            </li>
-                            <li>
-                              edit nicknames under nickables
-                            </li>
-                          </ul>
-
-                          <!-- insert pronouns -->
-                          <button class="btn btn-warning dropdown-toggle" type="button" :id="'dropdownMenuButtonPronoun'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
-                            insert pronoun
-                          </button>  
-                          <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonPronoun'+scene.keyName+line.keyName">
-                            <li v-for='(nick2, index61) in scriptObj.nicks' :key='index61'>
-                              <button type='button' class='dropdown-item' @click='insertPronoun(scene.keyName, line.keyName, nick2)'>{{ nick2.name }} ({{ nick2.pronoun }})</button>
-                            </li>
-                            <li>
-                              edit pronouns under nickables
-                            </li>
-                          </ul>
-
                         </div>
                       </div>
 
                     <!-- text section -->
                     <textarea class='card-body' name="text" maxlength='350' placeholder="write something here, enter to add new line" @keypress.enter.prevent='onAddLine(scene.keyName, line.keyName, line.next)' v-model='scriptObj["scene__" + scene.keyName]["line__" + line.keyName].text'></textarea>
+
+                    <div>
+                      <!-- insert nicknames -->
+                      <button class="btn btn-warning dropdown-toggle mx-2 mt-2" type="button" :id="'dropdownMenuButtonNickname'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                        insert nickname
+                      </button>  
+                      <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonNickname'+scene.keyName+line.keyName">
+                        <li v-for='(nick1, index60) in scriptObj.nicks' :key='index60'>
+                          <button type='button' class='dropdown-item' @click='insertNickname(scene.keyName, line.keyName, nick1)'>{{ nick1.name }} ({{ nick1.nick }}))</button>
+                        </li>
+                        <li>
+                          edit nicknames under assets
+                        </li>
+                      </ul>
+
+                      <!-- insert pronouns -->
+                      <button class="btn btn-warning dropdown-toggle mx-2 mt-2" type="button" :id="'dropdownMenuButtonPronoun'+scene.keyName+line.keyName" data-bs-toggle="dropdown" aria-expanded="false">
+                        insert pronoun
+                      </button>  
+                      <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonPronoun'+scene.keyName+line.keyName">
+                        <li v-for='(nick2, index61) in scriptObj.nicks' :key='index61'>
+                          <button type='button' class='dropdown-item' @click='insertPronoun(scene.keyName, line.keyName, nick2)'>{{ nick2.name }} ({{ nick2.pronoun }})</button>
+                        </li>
+                        <li>
+                          edit pronouns under assets
+                        </li>
+                      </ul>
+                    </div>
                   </div>
 
                 <!-- </div>
@@ -703,6 +752,8 @@ export default {
   data() {
     return {
       inputJSON: "",
+      assetJSON: "",
+      errMsg2: "",
       errMsg: "",
       startNum: 0,
       modalContext: {
@@ -722,6 +773,190 @@ export default {
     this.addNewScene()
   },
   methods: {
+    checkAsset() {
+
+    },
+    loadAsset() {
+
+    },
+
+    matchObject(target, baseObj) {
+      for (const [key, value] of Object.entries(baseObj)) {
+        value
+        if (target[key] == null) return false
+      }
+      return true
+    },
+    checkScript(script) {
+      // TO DO: api version separate check
+
+      var sceneCount = 0;
+      var charCount = 0;
+
+      // flag meta (backward compat)
+      var baseFlag = {
+        name: '',
+        type: ''
+      }
+      var baseOption = {
+        name: '',
+        required: [],
+        giving: []
+      }
+      var baseNick = {
+        name: '',
+        pronoun: '',
+        defaultPronoun: '',
+        nick: '',
+        defaultNick: ''
+      }
+      if (script.meta__flagList) {
+        for (var fl of script.meta__flagList) {
+          if (!this.matchObject(fl, baseFlag)) return false
+        }
+      } else {
+        script.meta__flagList = []
+      }
+      if (script.meta__flagGList) {
+        for (var fl2 of script.meta__flagGList) {
+          if (!this.matchObject(fl2, baseFlag)) return false
+        }
+      } else {
+        script.meta__flagGList = []
+      }
+      if (script.choice) {
+        if (!script.choice.prompt) return false
+        for (var opt of script.choice.options) {
+          if (!this.matchObject(opt, baseOption)) return false
+          for (var fl13 of opt.required) {
+            if (!this.matchObject(fl13, baseFlag)) return false
+          }
+          for (var fl14 of opt.giving) {
+            if (!this.matchObject(fl14, baseFlag)) return false
+          }
+        }
+      } else {
+        script.choice = {
+          prompt: '',
+          options: []
+        }
+      }
+
+      // nicks
+      if (!script.nicks) script.nicks = []
+      else {
+        for (var nick of script.nicks) {
+          if (!this.matchObject(nick, baseNick)) return false
+        }
+      }
+
+      // section links meta (backward compat)
+      if (script.meta__previous == null) script.meta__previous = ''
+      if (script.meta__id == null) script.meta__id = uuidv4()
+
+      // all meta fields
+      for (const [key, value] of Object.entries(this.scriptObj)) {
+        value
+        if (key.startsWith('meta__' && script[key] == null)) {
+          return false;
+        }
+      }
+      if (!script.char____narrator) return false
+
+      // scene and line and sprite meta fields
+      var baseScene = {
+        name : '',
+        author: '',
+        keyName : '',
+        next: '',
+        previous: '',
+        background: '',
+        ost: '',
+        meta__flagList: [],
+        meta__startName: '',
+        meta__endName: ''
+      }
+      var baseLine = {
+        keyName : '',
+        speaker: '',
+        text: '',
+        next: '',
+        previous: ''
+      }
+      var baseChar = {
+        keyName: '',
+        name: '',
+        expList: []
+      }
+      var baseSprite = {
+        keyName: '',
+        name: '',
+        expList: [],
+        pos: '',
+        exp: '',
+        included: true
+      }
+      for (const [key2, value2] of Object.entries(script)) {
+        // scene meta
+        if (key2.startsWith('scene__')) {
+          for (const [key3, value3] of Object.entries(baseScene)) {
+            value3
+            if (value2[key3] == null) {
+              if (key3 == 'meta__flagList') script[key2].meta__flagList = []
+              else if (key3 == 'meta__flagRList') script[key2].meta_flagRList = []
+              else {
+                return false
+              }
+            }
+          }
+          // line meta
+          for (const [key4, value4] of Object.entries(value2)) {
+            if (key4.startsWith('line__')) {
+              if (!this.matchObject(value4, baseLine)) return false
+              // sprite meta
+              for (const [key6, value6] of Object.entries(value4)) {
+                if (key6.startsWith('sprite__')) {
+                  if (!this.matchObject(value6, baseSprite)) return false
+                }
+              }
+            }
+          }
+        // char meta
+        } else if (key2.startsWith('char__') && key2 != 'char____narrator') {
+          if (!this.matchObject(value2, baseChar)) return false
+        }
+      }
+
+      // count scene and char
+      for (const[key1, value1] of Object.entries(script)) {
+        value1
+        if (key1.startsWith('scene__')) sceneCount += 1
+        if (key1.startsWith('char__')) charCount += 1
+      }
+      if (sceneCount != script.meta__scount) return false
+      if (charCount != script.meta__ccount) return false
+      return true
+    },
+    loadScript() {
+      try {
+        var script = JSON.parse(this.inputJSON)
+        if (!this.checkScript(script)) return
+        else {
+          for (const [key1, value1] of Object.entries(this.scriptObj)) {
+            value1
+            if (script[key1] == null) delete this.scriptObj[key1]
+          }
+          for (const [key, value] of Object.entries(script)) {
+            this.scriptObj[key] = value
+          }
+          this.inputJSON = ''
+        }
+      }
+      catch(err) {
+        this.errMsg = 'invalid script text !'
+      }
+    },
+
     insertNickname(scene, line, nick) {
       this.scriptObj['scene__' + scene]['line__' + line].text += "{@" + nick.name + "@}"
     },
@@ -1264,182 +1499,6 @@ export default {
       this.modalContext.success = ''
     },
 
-    matchObject(target, baseObj) {
-      for (const [key, value] of Object.entries(baseObj)) {
-        value
-        if (target[key] == null) return false
-      }
-      return true
-    },
-    checkScript(script) {
-      // TO DO: api version separate check
-
-      var sceneCount = 0;
-      var charCount = 0;
-
-      // flag meta (backward compat)
-      var baseFlag = {
-        name: '',
-        type: ''
-      }
-      var baseOption = {
-        name: '',
-        required: [],
-        giving: []
-      }
-      var baseNick = {
-        name: '',
-        pronoun: '',
-        defaultPronoun: '',
-        nick: '',
-        defaultNick: ''
-      }
-      if (script.meta__flagList) {
-        for (var fl of script.meta__flagList) {
-          if (!this.matchObject(fl, baseFlag)) return false
-        }
-      } else {
-        script.meta__flagList = []
-      }
-      if (script.meta__flagGList) {
-        for (var fl2 of script.meta__flagGList) {
-          if (!this.matchObject(fl2, baseFlag)) return false
-        }
-      } else {
-        script.meta__flagGList = []
-      }
-      if (script.choice) {
-        if (!script.choice.prompt) return false
-        for (var opt of script.choice.options) {
-          if (!this.matchObject(opt, baseOption)) return false
-          for (var fl13 of opt.required) {
-            if (!this.matchObject(fl13, baseFlag)) return false
-          }
-          for (var fl14 of opt.giving) {
-            if (!this.matchObject(fl14, baseFlag)) return false
-          }
-        }
-      } else {
-        script.choice = {
-          prompt: '',
-          options: []
-        }
-      }
-
-      // nicks
-      if (!script.nicks) script.nicks = []
-      else {
-        for (var nick of script.nicks) {
-          if (!this.matchObject(nick, baseNick)) return false
-        }
-      }
-
-      // section links meta (backward compat)
-      if (script.meta__previous == null) script.meta__previous = ''
-      if (script.meta__id == null) script.meta__id = uuidv4()
-
-      // all meta fields
-      for (const [key, value] of Object.entries(this.scriptObj)) {
-        value
-        if (key.startsWith('meta__' && script[key] == null)) {
-          return false;
-        }
-      }
-      if (!script.char____narrator) return false
-
-      // scene and line and sprite meta fields
-      var baseScene = {
-        name : '',
-        author: '',
-        keyName : '',
-        next: '',
-        previous: '',
-        background: '',
-        ost: '',
-        meta__flagList: [],
-        meta__startName: '',
-        meta__endName: ''
-      }
-      var baseLine = {
-        keyName : '',
-        speaker: '',
-        text: '',
-        next: '',
-        previous: ''
-      }
-      var baseChar = {
-        keyName: '',
-        name: '',
-        expList: []
-      }
-      var baseSprite = {
-        keyName: '',
-        name: '',
-        expList: [],
-        pos: '',
-        exp: '',
-        included: true
-      }
-      for (const [key2, value2] of Object.entries(script)) {
-        // scene meta
-        if (key2.startsWith('scene__')) {
-          for (const [key3, value3] of Object.entries(baseScene)) {
-            value3
-            if (value2[key3] == null) {
-              if (key3 == 'meta__flagList') script[key2].meta__flagList = []
-              else if (key3 == 'meta__flagRList') script[key2].meta_flagRList = []
-              else {
-                return false
-              }
-            }
-          }
-          // line meta
-          for (const [key4, value4] of Object.entries(value2)) {
-            if (key4.startsWith('line__')) {
-              if (!this.matchObject(value4, baseLine)) return false
-              // sprite meta
-              for (const [key6, value6] of Object.entries(value4)) {
-                if (key6.startsWith('sprite__')) {
-                  if (!this.matchObject(value6, baseSprite)) return false
-                }
-              }
-            }
-          }
-        // char meta
-        } else if (key2.startsWith('char__') && key2 != 'char____narrator') {
-          if (!this.matchObject(value2, baseChar)) return false
-        }
-      }
-
-      // count scene and char
-      for (const[key1, value1] of Object.entries(script)) {
-        value1
-        if (key1.startsWith('scene__')) sceneCount += 1
-        if (key1.startsWith('char__')) charCount += 1
-      }
-      if (sceneCount != script.meta__scount) return false
-      if (charCount != script.meta__ccount) return false
-      return true
-    },
-    loadScript() {
-      try {
-        var script = JSON.parse(this.inputJSON)
-        if (!this.checkScript(script)) return
-        else {
-          for (const [key1, value1] of Object.entries(this.scriptObj)) {
-            value1
-            if (script[key1] == null) delete this.scriptObj[key1]
-          }
-          for (const [key, value] of Object.entries(script)) {
-            this.scriptObj[key] = value
-          }
-          this.inputJSON = ''
-        }
-      }
-      catch(err) {
-        this.errMsg = 'invalid script text !'
-      }
-    },
     addNewScene() {
       var allScenes = this.getScenes()
       if (allScenes.length == 0) {
