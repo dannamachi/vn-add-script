@@ -204,8 +204,30 @@
             </li>
           </ul>
 
+          <!-- positions -->
+          <button class="mx-2 mt-2 btn btn-secondary dropdown-toggle" type="button" id="dropdownMenuButtonPositionAll" data-bs-toggle="dropdown" aria-expanded="false">
+            select to add positions
+          </button>
+          <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonPositionAll">
+            <li v-for='(cPos2, index600) in scriptObj.meta__posList' :key='index600'>
+              <button type='button' class='dropdown-item'>{{ cPos2 }}</button>
+            </li>
+            <li class='dropdown-item'>
+              <button @click='updateModalContext({
+                scene: "",
+                line: "",
+                sprite: "",
+                isEditing: false,
+                second: "",
+                type: "position"
+                })' type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                add new position
+              </button>
+            </li>
+          </ul>
+
           <!-- save current assets -->
-          <button type='button' class='btn btn-success' @click='downloadAsset()'>download assets</button>
+          <button type='button' class='mx-2 mt-2 btn btn-success' @click='downloadAsset()'>download assets</button>
         </div>
       </div>
     </div>
@@ -792,6 +814,7 @@ export default {
       var exportObj = {
         meta__bgList: this.scriptObj.meta__bgList,
         meta__ostList: this.scriptObj.meta__ostList,
+        meta__posList: this.scriptObj.meta__posList,
         meta__ccount: 0
       }
       for (const [key, value] of Object.entries(this.scriptObj)) {
@@ -811,6 +834,7 @@ export default {
       var ccount = 0
       if (!script.meta__bgList) script.meta__bgList = []
       if (!script.meta__ostList) script.meta__ostList = []
+      if (!script.meta__posList) script.meta__posList = []
       for (const [key1, value1] of Object.entries(script)) {
         if (key1.startsWith('char__')) {
           if (!this.matchObject(value1, baseChar)) return false
@@ -830,6 +854,9 @@ export default {
           }
           for (var ost of script.meta__ostList) {
             if (!this.scriptObj.meta__ostList.includes(ost)) this.scriptObj.meta__ostList.push(ost)
+          }
+          for (var pos of script.meta__posList) {
+            if (!this.scriptObj.meta__posList.includes(pos)) this.scriptObj.meta__posList.push(pos)
           }
           for (const [key, value] of Object.entries(script)) {
             if (key.startsWith('char__')) this.scriptObj[key] = value
