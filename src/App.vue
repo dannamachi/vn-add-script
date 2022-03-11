@@ -815,6 +815,7 @@ export default {
         meta__bgList: this.scriptObj.meta__bgList,
         meta__ostList: this.scriptObj.meta__ostList,
         meta__posList: this.scriptObj.meta__posList,
+        nicks: this.scriptObj.nicks,
         meta__ccount: 0
       }
       for (const [key, value] of Object.entries(this.scriptObj)) {
@@ -825,16 +826,41 @@ export default {
       }
       require("downloadjs")(JSON.stringify(exportObj), "assets.json", "text/plain");
     },
+    isString(thing) {
+      return typeof thing === 'string' || thing instanceof String
+    },
+    isStringList(things) {
+      for (var thing of things) {
+        if (!this.isString(thing)) return false
+      }
+      return true
+    },
     checkAsset(script) {
       var baseChar = {
         keyName: '',
         name: '',
         expList: []
       }
+      var baseNick = {
+        name: '',
+        pronoun: '',
+        defaultPronoun: '',
+        nick: '',
+        defaultNick: ''
+      }
       var ccount = 0
       if (!script.meta__bgList) script.meta__bgList = []
+      else if (!this.isStringList(script.meta__bgList)) return false
       if (!script.meta__ostList) script.meta__ostList = []
+      else if (!this.isStringList(script.meta__bgList)) return false
       if (!script.meta__posList) script.meta__posList = []
+      else if (!this.isStringList(script.meta__bgList)) return false
+      if (!script.nicks) script.nicks = []
+      else {
+        for (var nick of script.nicks) {
+          if (!this.matchObject(nick, baseNick)) return false
+        }
+      }
       for (const [key1, value1] of Object.entries(script)) {
         if (key1.startsWith('char__')) {
           if (!this.matchObject(value1, baseChar)) return false
@@ -858,9 +884,20 @@ export default {
           for (var pos of script.meta__posList) {
             if (!this.scriptObj.meta__posList.includes(pos)) this.scriptObj.meta__posList.push(pos)
           }
+          for (var nick of script.nicks) {
+            if (!this.isNickDuplicate(nick.name)) this.scriptObj.nicks.push(nick)
+          }
           for (const [key, value] of Object.entries(script)) {
             if (key.startsWith('char__')) this.scriptObj[key] = value
           }
+          var ccount = 0
+          for (const [key1, value1] of Object.entries(this.scriptObj)) {
+            if (key1.startsWith('char__')) {
+              value1
+              ccount += 1
+            }
+          }
+          this.scriptObj.meta__ccount = ccount
           this.assetJSON = ''
         }
       }
@@ -920,6 +957,7 @@ export default {
       } else {
         script.meta__flagList = []
       }
+      // console.log('flag ok!')
       if (script.meta__flagGList) {
         for (var fl2 of script.meta__flagGList) {
           if (!this.matchObject(fl2, baseFlag)) return false
@@ -927,8 +965,10 @@ export default {
       } else {
         script.meta__flagGList = []
       }
+      // console.log('flag give ok!')
       if (script.choice) {
-        if (!script.choice.prompt) return false
+        if (script.choice.prompt == null) return false
+        // console.log('prompt ok!')
         for (var opt of script.choice.options) {
           if (!this.matchObject(opt, baseOption)) return false
           for (var fl13 of opt.required) {
@@ -944,6 +984,7 @@ export default {
           options: []
         }
       }
+      // console.log('choice ok!')
 
       // nicks
       if (!script.nicks) script.nicks = []
@@ -952,6 +993,7 @@ export default {
           if (!this.matchObject(nick, baseNick)) return false
         }
       }
+      // console.log('nick ok!')
 
       // section links meta (backward compat)
       if (script.meta__previous == null) script.meta__previous = ''
@@ -961,6 +1003,7 @@ export default {
       for (const [key, value] of Object.entries(this.scriptObj)) {
         value
         if (key.startsWith('meta__' && script[key] == null)) {
+          //  console.log(key + ' is null!')
           return false;
         }
       }
@@ -1043,7 +1086,9 @@ export default {
     loadScript() {
       try {
         var script = JSON.parse(this.inputJSON)
-        if (!this.checkScript(script)) return
+        if (!this.checkScript(script)) {
+          this.errMsg = 'invalid script text !'
+        }
         else {
           for (const [key1, value1] of Object.entries(this.scriptObj)) {
             value1
