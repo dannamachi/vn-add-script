@@ -58,7 +58,7 @@
                     </div>
                     <div v-else>
                         <p>Enter to change from '{{ this.context.oldName }}':</p>
-                        <input type="text" v-model="nameValue" maxlength="40" @keypress.enter.prevent="onEditAsset()"/>
+                        <input type="text" v-model="nameValue" maxlength="40" @keypress.enter.prevent="onAddSprite()"/>
                     </div>
                     <div v-if='context.success=="yes"' class="alert alert-success" role="alert">
                         {{ context.type}} updated !
