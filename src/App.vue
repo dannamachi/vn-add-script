@@ -656,9 +656,10 @@
                           <!-- button to add line (indexed unique name) -->
                           <button class="btn btn-link" @click='onAddLine(scene.keyName, line.keyName, line.next)'>add line</button>
 
+                          <!-- list of both characters and nickables -->
                           <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonSpeaker'+scene.keyName+line.keyName">
-                            <li v-for='(speaking, index8) in getAllSprites()' :key='index8'>
-                              <button type='button' class='dropdown-item' @click='selectSpeaker(scene.keyName, line.keyName, speaking)'>{{ speaking.name }}</button>
+                            <li v-for='(speaking, index8) in getAllSpeakers()' :key='index8'>
+                              <button type='button' class='dropdown-item' @click='selectSpeaker(scene.keyName, line.keyName, speaking)'>{{ speaking.keyName }} {{ speaking.isNick ? '(' + speaking.defaultName + ')' : ''}}</button>
                             </li>
                             <li class='dropdown-item'>
                               <button @click='updateModalContext({
@@ -686,7 +687,7 @@
                       </button>  
                       <ul class="dropdown-menu" :aria-labelledby="'dropdownMenuButtonNickname'+scene.keyName+line.keyName">
                         <li v-for='(nick1, index60) in scriptObj.nicks' :key='index60'>
-                          <button type='button' class='dropdown-item' @click='insertNickname(scene.keyName, line.keyName, nick1)'>{{ nick1.name }} ({{ nick1.nick }}))</button>
+                          <button type='button' class='dropdown-item' @click='insertNickname(scene.keyName, line.keyName, nick1)'>{{ nick1.name }} ({{ nick1.nick }})</button>
                         </li>
                         <li>
                           edit nicknames under assets
@@ -1024,7 +1025,7 @@ export default {
       }
       var baseLine = {
         keyName : '',
-        speaker: '',
+        speaker: {},
         text: '',
         next: '',
         previous: ''
@@ -1161,6 +1162,14 @@ export default {
             if (key1.startsWith('line__')) {
               this.scriptObj[key][key1].text = this.parseAndReplace(value1.text, this.modalContext.old, newNick)
               this.scriptObj[key][key1].text = this.parseAndReplace(value1.text, this.modalContext.old, newNick, 'p')
+              if (value1.speaker.isNick && value1.speaker.keyName == this.modalContext.old.name) {
+                this.scriptObj[key][key1].speaker = {
+                  keyName: newNick.name,
+                  name: newNick.nick,
+                  isNick: true,
+                  defaultName: newNick.defaultNick
+                }
+              }
             }
           }
         }
@@ -1594,6 +1603,7 @@ export default {
         this.modalContext.success = 'no'
         return;
       }
+
       for (const [key, value] of Object.entries(this.scriptObj)) {
         if (key.startsWith('char__')) {
           if (value.keyName == stuff.newName) {
@@ -1602,7 +1612,6 @@ export default {
           }
         }
       }
-
       // clone char data
       var newChar = clone(this.scriptObj['char__' + stuff.oldName])
       newChar.keyName = stuff.newName,
@@ -1626,8 +1635,8 @@ export default {
                   // delete old
                   delete this.scriptObj[key][key1][key2]
                 } 
-                else if (key2 == 'speaker' && value2.keyName == stuff.oldName) {
-                  this.scriptObj[key][key1].speaker = this.scriptObj['char__' + stuff.newName]
+                else if (key2 == 'speaker' && value2.keyName == stuff.oldName && !value2.isNick) {
+                  this.scriptObj[key][key1].speaker = this.getSpeakerFromSprite(newChar)
                 }
               }
             }
@@ -1700,6 +1709,7 @@ export default {
     },
     selectSpeaker(sceneName, lineName, speaker) {
       this.scriptObj["scene__" + sceneName]["line__" + lineName].speaker = speaker
+      // console.log(this.scriptObj["scene__" + sceneName]["line__" + lineName].speaker)
     },
     selectExpression(sceneName, lineName, spriteName, exp) {
       this.scriptObj["scene__" + sceneName]["line__" + lineName]["sprite__" + spriteName].exp = exp
@@ -1766,7 +1776,7 @@ export default {
       if (spObj.addToDisplay) {
         this.addSpriteToDisplay(spObj.addToDisplay.scene, spObj.addToDisplay.line, spObj.sprite)
       } else if (spObj.selectSpeaker) {
-        this.selectSpeaker(spObj.selectSpeaker.scene, spObj.selectSpeaker.line, this.scriptObj['char__' + spObj.sprite])
+        this.selectSpeaker(spObj.selectSpeaker.scene, spObj.selectSpeaker.line, this.getSpeakerFromSprite(this.scriptObj['char__' + spObj.sprite]))
       }
       this.modalContext.success = 'yes'
     },
@@ -1838,6 +1848,22 @@ export default {
       if (flag.type == 'inc') return flag.name + ' + ' + flag.score
       if (flag.type == 'dec') return flag.name + ' - ' + flag.score
       return 'invalid flag'
+    },
+    getAllSpeakers() {
+      var speaks = []
+      var chars = this.getAllSprites()
+      for (var charz of chars) {
+        speaks.push(this.getSpeakerFromSprite(charz))
+      }
+      for (var nick of this.scriptObj.nicks) {
+        speaks.push({
+          keyName: nick.name,
+          name: nick.nick,
+          isNick: true,
+          defaultName: nick.defaultNick
+        })
+      }
+      return speaks
     },
     getAllSprites(noNar=false) {
       var sList = []
@@ -1920,6 +1946,13 @@ export default {
       }
       return sceneList;
     },
+    getSpeakerFromSprite(sprite) {
+      return {
+        keyName: sprite.keyName,
+        name: sprite.name,
+        isNick: false
+      }
+    },
     // unique indexed name
     // second char list
     onAddLine(sceneName, lastName, nextName) {
@@ -1932,7 +1965,7 @@ export default {
       var uniqueID = uuidv4(); // ⇨ '9b1deb4d-3b7d-4bad-9bdd-2b0d7b3dcb6d'
       var newLine = {
         keyName : uniqueID,
-        speaker: clone(this.scriptObj.char____narrator),
+        speaker: this.getSpeakerFromSprite(this.scriptObj.char____narrator),
         text: '',
         next: nextName,
         previous: lastName
@@ -1944,7 +1977,7 @@ export default {
             newLine['sprite__' + value.keyName] = clone(value)
           }
         }
-        newLine.speaker = lastLine.speaker
+        newLine.speaker = clone(lastLine.speaker)
       }
       // add to script obj
       this.scriptObj['scene__' + sceneName]['line__' + uniqueID] = newLine
