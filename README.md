@@ -89,7 +89,12 @@ Exported JSON file contains metadata for VN-like dialogue system that can be imp
 
         'line__someLineID' : {
             'keyName'   : 'someLineID',
-            'speaker'   : 'someLineSpeaker',
+            'speaker'   : {
+                keyName        : 'someSpeakerID', // character/nickable id
+                name           : 'someSpeakerName',  // displayed name/nick
+                isNick         : false, // boolean if is nick
+                defaultName    : 'someDefaultName' // only if nick
+            }, // speaker obj
             'text'      : 'someLineTest',
             'next'      : 'nextLineID', // ID of next line
             'previous'  : 'lastLineID', // ID of last line
