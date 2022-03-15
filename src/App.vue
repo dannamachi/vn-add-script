@@ -1043,6 +1043,11 @@ export default {
         exp: '',
         included: true
       }
+      var baseSpeaker = {
+        keyName: '',
+        name: '',
+        isNick: true
+      }
       for (const [key2, value2] of Object.entries(script)) {
         // scene meta
         if (key2.startsWith('scene__')) {
@@ -1065,6 +1070,11 @@ export default {
                 if (key6.startsWith('sprite__')) {
                   if (!this.matchObject(value6, baseSprite)) return false
                 }
+              }
+              // speaker meta
+              if (!this.matchObject(value4.speaker, baseSpeaker)) {
+                if (!this.matchObject(value4.speaker, baseChar)) return false
+                script[key2][key4].speaker = this.getSpeakerFromSprite(value4.speaker)
               }
             }
           }
